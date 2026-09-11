@@ -1,139 +1,162 @@
-# SkillSwap
-
 # SkillSwap 🎓
 
 ### Learn. Teach. Swap.
 
 **SkillSwap** adalah aplikasi mobile berbasis **peer-to-peer skill exchange** yang dirancang untuk membantu mahasiswa menemukan teman belajar berdasarkan kemampuan yang mereka miliki dan skill yang ingin mereka pelajari.
 
-Berbeda dengan platform kursus pada umumnya, SkillSwap tidak berfokus pada transaksi jual beli kursus. Konsep utama aplikasi adalah **pertukaran pengetahuan antar pengguna**.
+Berbeda dari platform kursus pada umumnya, SkillSwap tidak berfokus pada transaksi jual beli kursus. Konsep utama aplikasi adalah **pertukaran pengetahuan antar mahasiswa**.
 
-Pengguna dapat:
-
-* Mengajarkan skill yang mereka kuasai.
-* Mencari skill yang ingin mereka pelajari.
-* Menemukan pengguna dengan skill yang sesuai.
-* Mengirim permintaan SkillSwap.
-* Melakukan komunikasi melalui chat.
-* Menjadwalkan sesi belajar.
-* Memberikan rating dan review.
-* Mendapatkan XP dan achievement.
+Pengguna dapat menjadi **learner** sekaligus **mentor** bagi pengguna lain.
 
 ---
 
-## 📱 Preview
+# 📋 Project Scope
 
-> **SkillSwap**
-> *Learn. Teach. Swap.*
+## 1. Deskripsi Masalah
 
-Aplikasi dirancang dengan konsep UI modern, clean, minimalis, dan student-oriented.
+Mahasiswa memiliki kemampuan dan kebutuhan belajar yang berbeda-beda. Ada mahasiswa yang menguasai programming, desain, editing, bahasa, public speaking, atau skill lainnya.
 
-Halaman utama aplikasi meliputi:
+Di sisi lain, terdapat mahasiswa yang ingin mempelajari skill tersebut tetapi kesulitan menemukan teman belajar atau mentor yang sesuai.
 
-* Splash Screen
-* Login
-* Register
-* Onboarding
-* Home
-* Discover
-* User Profile
-* SkillSwap Request
-* Chat
-* Session
-* Learning Progress
-* Notification
-* Profile
+Masalah yang ingin diselesaikan SkillSwap adalah:
 
----
+* Mahasiswa kesulitan menemukan teman belajar dengan skill yang sesuai.
+* Mahasiswa yang memiliki kemampuan tertentu belum memiliki wadah untuk membagikan ilmunya.
+* Proses mencari teman belajar masih dilakukan secara manual melalui lingkungan pertemanan atau komunitas.
+* Platform pembelajaran pada umumnya lebih berfokus pada hubungan antara pengajar dan peserta, bukan pertukaran skill dua arah.
+* Mahasiswa membutuhkan metode belajar yang lebih sosial dan interaktif.
 
-# 🎯 Latar Belakang
+### Solusi
 
-Mahasiswa memiliki berbagai kemampuan yang berbeda. Ada mahasiswa yang menguasai programming, desain, editing, bahasa, public speaking, atau kemampuan lainnya.
+SkillSwap mempertemukan mahasiswa berdasarkan dua jenis informasi:
 
-Di sisi lain, mahasiswa lain mungkin membutuhkan kemampuan tersebut tetapi tidak memiliki sumber belajar atau mentor yang mudah dijangkau.
-
-SkillSwap hadir untuk mempertemukan kedua kebutuhan tersebut.
+**Skill yang dapat diajarkan**
+dan
+**Skill yang ingin dipelajari**
 
 Contohnya:
 
-**Gabriel**
+```text
+Gabriel
+Can Teach:
+- UI/UX
+- HTML/CSS
 
-> Can Teach:
->
-> * UI/UX
-> * HTML/CSS
->
-> Want to Learn:
->
-> * Python
-> * Data Science
+Want to Learn:
+- Python
+- Data Science
+```
 
-**Andi**
+Kemudian sistem dapat menemukan mahasiswa lain:
 
-> Can Teach:
->
-> * Python
-> * Data Science
->
-> Want to Learn:
->
-> * UI/UX
+```text
+Andi
+Can Teach:
+- Python
+- Data Science
 
-SkillSwap dapat menemukan keduanya sebagai potential match.
+Want to Learn:
+- UI/UX
+```
 
-### 🎯 98% SkillSwap Match
+Keduanya dapat melakukan pertukaran skill:
 
-Gabriel dapat belajar Python dari Andi, sementara Andi dapat belajar UI/UX dari Gabriel.
+```text
+Gabriel → belajar Python dari Andi
+Gabriel → mengajarkan UI/UX kepada Andi
+```
 
-Dengan konsep tersebut, proses belajar menjadi **dua arah dan saling menguntungkan**.
-
----
-
-# 🚀 Tujuan Project
-
-Tujuan utama pengembangan SkillSwap adalah:
-
-1. Mempermudah mahasiswa menemukan teman belajar.
-2. Memfasilitasi pertukaran skill antar mahasiswa.
-3. Membangun komunitas belajar berbasis peer-to-peer.
-4. Membantu mahasiswa mengembangkan kemampuan di luar perkuliahan.
-5. Memberikan pengalaman belajar yang lebih sosial dan interaktif.
-6. Mengurangi ketergantungan terhadap pembelajaran berbayar untuk skill dasar.
+Dengan demikian, proses belajar menjadi **dua arah dan saling menguntungkan**.
 
 ---
 
-# ✨ Fitur Utama
+# 2. Profil Target Pengguna
 
-## 1. Authentication 🔐
+Target utama SkillSwap adalah **mahasiswa perguruan tinggi**.
+
+### Target pengguna utama
+
+* Mahasiswa yang ingin mempelajari skill baru.
+* Mahasiswa yang memiliki skill tertentu dan ingin mengajarkannya.
+* Mahasiswa yang ingin mencari teman belajar.
+* Mahasiswa yang ingin mengembangkan skill di luar perkuliahan.
+* Mahasiswa yang ingin belajar melalui metode peer-to-peer.
+
+### Target komunitas
+
+SkillSwap dapat dikembangkan untuk:
+
+* Mahasiswa dalam satu universitas.
+* Organisasi mahasiswa.
+* Komunitas kampus.
+* Antaruniversitas.
+
+Namun, untuk versi awal, aplikasi **difokuskan pada mahasiswa** agar ruang lingkup pengembangan tetap realistis untuk diselesaikan dalam **12 pertemuan**.
+
+---
+
+# 3. Manfaat Aplikasi
+
+SkillSwap memberikan beberapa manfaat utama:
+
+### 🎓 Bagi mahasiswa
+
+* Mempermudah menemukan teman belajar.
+* Membantu mendapatkan mentor sebaya.
+* Mempermudah mencari skill yang ingin dipelajari.
+* Memberikan kesempatan untuk mengajarkan skill yang dikuasai.
+* Membantu mahasiswa mengembangkan kemampuan di luar perkuliahan.
+
+### 🤝 Bagi komunitas kampus
+
+* Membangun komunitas belajar berbasis peer-to-peer.
+* Mendorong mahasiswa untuk saling berbagi pengetahuan.
+* Meningkatkan interaksi antar mahasiswa.
+* Membentuk lingkungan belajar yang lebih kolaboratif.
+
+### 💡 Konsep utama
+
+SkillSwap tidak hanya menanyakan:
+
+> **"Apa yang ingin kamu pelajari?"**
+
+Tetapi juga:
+
+> **"Apa yang bisa kamu ajarkan?"**
+
+---
+
+# 4. Daftar Fitur Inti
+
+Karena proyek harus diselesaikan dalam **12 pertemuan**, fitur inti dibatasi pada fungsi yang mendukung alur utama pertukaran skill.
+
+## Fitur wajib
+
+### 1. Authentication 🔐
 
 Pengguna dapat:
 
-* Register akun.
+* Register.
 * Login.
 * Logout.
 * Mengelola akun.
 
-Data pengguna disimpan secara aman menggunakan sistem authentication.
-
 ---
 
-## 2. User Profile 👤
+### 2. User Profile 👤
 
-Setiap pengguna memiliki profile yang berisi:
+Profile pengguna berisi:
 
-* Nama
-* Foto profil
-* Universitas
-* Program studi
-* Tahun angkatan
-* Rating
-* Level
-* XP
-* Jumlah session
-* Skill yang dapat diajarkan
-* Skill yang ingin dipelajari
-* Availability
-* Mode pembelajaran
+* Nama.
+* Foto profil.
+* Universitas.
+* Program studi.
+* Tahun angkatan.
+* Rating.
+* Skill yang dapat diajarkan.
+* Skill yang ingin dipelajari.
+* Availability.
+* Mode pembelajaran.
 
 Contoh:
 
@@ -142,8 +165,6 @@ Gabriel
 Informatics Student
 
 ⭐ 4.8 Rating
-🏆 Level 8
-🔥 12 Sessions
 
 CAN TEACH
 🎨 UI/UX
@@ -156,11 +177,11 @@ WANT TO LEARN
 
 ---
 
-# 3. Skill Management 🧠
+### 3. Skill Management 🧠
 
-Pengguna dapat menentukan dua jenis skill:
+Pengguna dapat menentukan:
 
-### I Can Teach
+#### I Can Teach
 
 Skill yang dikuasai dan dapat diajarkan.
 
@@ -173,7 +194,7 @@ Contoh:
 * Video Editing
 * Public Speaking
 
-### I Want to Learn
+#### I Want to Learn
 
 Skill yang ingin dipelajari.
 
@@ -187,11 +208,11 @@ Contoh:
 
 ---
 
-# 4. Skill Discovery 🔎
+### 4. Skill Discovery 🔎
 
-Pengguna dapat mencari skill yang tersedia di dalam komunitas.
+Pengguna dapat mencari pengguna berdasarkan skill.
 
-Kategori skill:
+Kategori:
 
 * Programming
 * Design
@@ -202,52 +223,43 @@ Kategori skill:
 * Marketing
 * Productivity
 
-Pengguna juga dapat menggunakan filter:
-
-* Skill level
-* Rating
-* Online / Offline
-* Availability
-* University
+Pengguna dapat melihat pengguna yang memiliki skill yang dibutuhkan.
 
 ---
 
-# 5. Smart Matching 🎯
+### 5. Skill Matching 🎯
 
-Salah satu fitur utama SkillSwap adalah sistem pencocokan pengguna.
+Sistem memberikan rekomendasi pengguna berdasarkan kecocokan skill.
 
-Sistem menghitung tingkat kecocokan berdasarkan:
+Parameter utama:
 
 * Skill yang ingin dipelajari.
 * Skill yang dapat diajarkan.
-* Skill yang ingin dipelajari oleh pengguna lain.
-* Skill yang dapat diajarkan oleh pengguna lain.
-* Kesamaan jadwal.
+* Skill yang ingin dipelajari pengguna lain.
+* Skill yang dapat diajarkan pengguna lain.
+* Availability.
 * Mode pembelajaran.
-* Rating.
-* Komunitas/universitas.
 
 Contoh:
 
 ```text
-Skill Match          50%
-Reverse Skill Match 20%
-Schedule Match      15%
-Learning Mode       10%
-Rating               5%
--------------------------
-Total               100%
+🎯 95% MATCH
+
+Andi Pratama
+
+Can Teach:
+🐍 Python
+📊 Data Science
+
+Wants to Learn:
+🎨 UI/UX
 ```
 
-Hasil ditampilkan sebagai:
-
-```text
-🎯 98% MATCH
-```
+Untuk versi awal, sistem matching menggunakan **scoring sederhana**, bukan Artificial Intelligence.
 
 ---
 
-# 6. SkillSwap Request 🤝
+### 6. SkillSwap Request 🤝
 
 Pengguna dapat mengirim permintaan pertukaran skill.
 
@@ -264,48 +276,46 @@ I can teach:
 
 Message:
 
-"Hi! I would like to learn Python
-from you. In exchange, I can help
-you learn UI/UX."
+"Hi! I would like to learn Python from you.
+In exchange, I can help you learn UI/UX."
 ```
 
 Penerima dapat:
 
-* Accept
-* Decline
+* Accept.
+* Decline.
 
 ---
 
-# 7. Chat 💬
+### 7. Chat 💬
 
-Setelah request diterima, kedua pengguna dapat berkomunikasi melalui chat.
+Setelah request diterima, pengguna dapat berkomunikasi.
 
 Fitur:
 
-* Text message
-* Timestamp
-* Read status
-* Session scheduling
+* Text message.
+* Timestamp.
+* Read status.
 
-Chat digunakan untuk menentukan waktu dan metode belajar.
+Chat digunakan untuk membahas proses dan jadwal belajar.
 
 ---
 
-# 8. Session Scheduling 📅
+### 8. Session Scheduling 📅
 
 Pengguna dapat membuat sesi belajar.
 
 Informasi session:
 
-* Skill
-* Teacher
-* Learner
-* Date
-* Start time
-* End time
-* Mode
-* Meeting link
-* Status
+* Skill.
+* Teacher.
+* Learner.
+* Date.
+* Start time.
+* End time.
+* Mode.
+* Meeting link.
+* Status.
 
 Contoh:
 
@@ -331,187 +341,23 @@ Status:
 Upcoming
 ```
 
-Status session:
-
-```text
-Upcoming
-    ↓
-Ongoing
-    ↓
-Completed
-```
-
 ---
 
-# 9. Learning Progress 📚
-
-Pengguna dapat melihat progress skill yang sedang dipelajari.
-
-Contoh:
-
-```text
-Python
-
-Beginner
-
-████████████░░░░░░ 60%
-
-✓ Variables
-✓ Data Types
-✓ Operators
-✓ Conditional
-○ Loops
-○ Functions
-○ OOP
-```
-
-Progress dapat diperbarui berdasarkan session dan aktivitas belajar.
-
----
-
-# 10. Rating & Review ⭐
+### 9. Rating & Review ⭐
 
 Setelah session selesai, pengguna dapat memberikan rating.
-
-Rating:
 
 ```text
 ⭐ ⭐ ⭐ ⭐ ⭐
 ```
 
-Kategori review:
+Pengguna juga dapat memberikan komentar mengenai pengalaman belajar.
 
-* Good explanation
-* Friendly
-* On time
-* Helpful
-* Easy to understand
-
-Pengguna juga dapat menulis komentar.
-
-Rating akan digunakan sebagai salah satu parameter dalam sistem matching.
+Rating dapat digunakan sebagai salah satu informasi pendukung dalam sistem matching.
 
 ---
 
-# 11. Gamification 🎮
-
-Untuk meningkatkan engagement, SkillSwap menggunakan sistem XP.
-
-Contoh:
-
-| Aktivitas                 |  XP |
-| ------------------------- | --: |
-| Complete Profile          | +20 |
-| Complete Learning Session | +50 |
-| Teach Someone             | +50 |
-| Give Review               | +10 |
-| Receive 5-Star Rating     | +20 |
-
-Level:
-
-```text
-Level 1  → Beginner
-Level 5  → Contributor
-Level 10 → Skill Mentor
-Level 20 → Skill Master
-```
-
----
-
-# 12. Achievement 🏆
-
-Pengguna dapat memperoleh achievement.
-
-Contoh:
-
-### 🏆 First Swap
-
-Melakukan SkillSwap pertama.
-
-### 🎓 Skill Mentor
-
-Mengajar 10 session.
-
-### 🔥 Learning Streak
-
-Belajar selama 7 hari berturut-turut.
-
-### ⭐ Top Mentor
-
-Mendapatkan rating tinggi.
-
-### 🤝 Community Helper
-
-Membantu 25 mahasiswa.
-
-Achievement yang belum diperoleh ditampilkan dalam kondisi locked.
-
----
-
-# 13. Notification 🔔
-
-Aplikasi memberikan notifikasi untuk aktivitas penting.
-
-Contoh:
-
-```text
-🔔 New Match
-
-You have a 95% SkillSwap match with Kevin.
-```
-
-```text
-🔔 New Request
-
-Sarah wants to SkillSwap with you.
-```
-
-```text
-🔔 Session Reminder
-
-Your Python session starts in 30 minutes.
-```
-
-```text
-🔔 Review Reminder
-
-Don't forget to review your last session.
-```
-
----
-
-# 14. Online & Offline Learning 🌐
-
-SkillSwap mendukung dua metode pembelajaran.
-
-### Online
-
-Contoh:
-
-* Google Meet
-* Zoom
-* Discord
-
-### Offline
-
-Pertemuan dilakukan di tempat umum seperti:
-
-* Kampus
-* Perpustakaan
-* Cafe
-* Study space
-
-Pengguna dapat memilih:
-
-```text
-Online
-Offline
-Both
-```
-
----
-
-# 🧭 User Flow
+# 5. User Flow
 
 Alur utama aplikasi:
 
@@ -520,7 +366,7 @@ Splash Screen
       ↓
 Login / Register
       ↓
-Onboarding
+Complete Profile
       ↓
 Select Skills
       ↓
@@ -536,7 +382,7 @@ View Profile
       ↓
 SkillSwap Request
       ↓
-Accept
+Accept Request
       ↓
 Chat
       ↓
@@ -547,15 +393,200 @@ Learning Session
 Complete Session
       ↓
 Rating & Review
-      ↓
-XP & Progress
 ```
+
+Alur tersebut merupakan **core workflow** yang menjadi fokus utama pengembangan dalam 12 pertemuan.
 
 ---
 
-# 🏗️ Application Architecture
+# 6. Fitur yang Tidak Dikerjakan
 
-Secara umum aplikasi memiliki beberapa komponen:
+Untuk menjaga agar proyek realistis dan dapat diselesaikan dalam **12 pertemuan**, fitur berikut **tidak menjadi bagian dari implementasi utama**.
+
+### ❌ Tidak termasuk dalam MVP
+
+* AI Skill Recommendation.
+* Skill Assessment.
+* Personalized Learning Roadmap.
+* Leaderboard.
+* Calendar Integration.
+* Sistem pembayaran.
+* Marketplace atau jual beli kursus.
+* Integrasi video conference langsung.
+* Advanced Learning Progress.
+* Gamification kompleks.
+* Achievement system.
+* Sistem subscription.
+* Verifikasi sertifikat skill.
+
+Fitur-fitur tersebut dapat menjadi bagian dari **future development** apabila aplikasi dikembangkan lebih lanjut.
+
+---
+
+# 7. Batasan Scope 12 Pertemuan
+
+Agar pengembangan tetap realistis, project dibatasi pada:
+
+```text
+Authentication
+      ↓
+User Profile
+      ↓
+Skill Management
+      ↓
+Skill Discovery
+      ↓
+Skill Matching
+      ↓
+SkillSwap Request
+      ↓
+Chat
+      ↓
+Session Scheduling
+      ↓
+Rating & Review
+```
+
+Fokus utama bukan pada jumlah fitur sebanyak mungkin, tetapi memastikan **core workflow dapat berjalan dari awal hingga akhir**.
+
+---
+
+# 8. Kriteria Aplikasi Dinyatakan Berhasil
+
+Aplikasi dinyatakan berhasil apabila pengguna dapat menyelesaikan proses utama SkillSwap tanpa mengalami kegagalan fungsi.
+
+### Functional Criteria
+
+Pengguna harus dapat:
+
+* Membuat akun.
+* Login ke aplikasi.
+* Melengkapi profile.
+* Menentukan skill yang dapat diajarkan.
+* Menentukan skill yang ingin dipelajari.
+* Menemukan pengguna lain.
+* Mendapatkan hasil matching.
+* Mengirim SkillSwap Request.
+* Menerima atau menolak request.
+* Melakukan chat setelah request diterima.
+* Membuat jadwal session.
+* Menyelesaikan session.
+* Memberikan rating dan review.
+
+### Technical Criteria
+
+Aplikasi harus:
+
+* Dapat dijalankan pada perangkat Android.
+* Memiliki interface yang dapat digunakan dengan baik.
+* Dapat menyimpan data pengguna.
+* Dapat menyimpan data skill.
+* Dapat menyimpan request.
+* Dapat menyimpan data session.
+* Dapat menyimpan chat.
+* Dapat menyimpan rating dan review.
+* Memiliki alur navigasi yang jelas.
+* Tidak mengalami error pada core workflow.
+
+### Project Success Criteria
+
+Secara keseluruhan, MVP dianggap berhasil apabila:
+
+> **Seorang mahasiswa dapat mendaftar, menentukan skill yang ingin dipelajari dan diajarkan, menemukan mahasiswa yang sesuai, melakukan SkillSwap, berkomunikasi, menjadwalkan sesi belajar, menyelesaikan sesi, dan memberikan rating.**
+
+---
+
+# 9. MVP Scope
+
+## Core Features
+
+| Feature             | Status | Prioritas |
+| ------------------- | ------ | --------- |
+| Authentication      | ✅      | High      |
+| User Profile        | ✅      | High      |
+| Skill Selection     | ✅      | High      |
+| Teach / Learn Skill | ✅      | High      |
+| Skill Discovery     | ✅      | High      |
+| Skill Matching      | ✅      | High      |
+| SkillSwap Request   | ✅      | High      |
+| Chat                | ✅      | High      |
+| Session Scheduling  | ✅      | High      |
+| Rating & Review     | ✅      | High      |
+
+## Future Features
+
+| Feature              | Status |
+| -------------------- | ------ |
+| XP                   | Future |
+| Achievement          | Future |
+| Learning Progress    | Future |
+| Notification         | Future |
+| Leaderboard          | Future |
+| AI Recommendation    | Future |
+| Calendar Integration | Future |
+| Skill Assessment     | Future |
+| Learning Roadmap     | Future |
+
+---
+
+# 10. Smart Matching Algorithm
+
+Versi awal SkillSwap menggunakan sistem **scoring sederhana**.
+
+Parameter:
+
+```text
+Skill Match          50%
+Reverse Skill Match  20%
+Schedule Match       15%
+Learning Mode        10%
+Rating                5%
+```
+
+Formula:
+
+```text
+Match Score =
+(Skill Match × 0.50)
++
+(Reverse Match × 0.20)
++
+(Schedule Match × 0.15)
++
+(Mode Match × 0.10)
++
+(Rating × 0.05)
+```
+
+Contoh:
+
+```text
+Skill Match:       100
+Reverse Match:     100
+Schedule Match:     80
+Mode Match:        100
+Rating:             90
+```
+
+Hasil:
+
+```text
+Final Score = 95.5%
+```
+
+Kemudian ditampilkan kepada pengguna:
+
+```text
+🎯 96% Match
+```
+
+> **Catatan:** Matching pada MVP tidak menggunakan AI. Sistem menggunakan rule-based scoring agar realistis untuk pengembangan dalam 12 pertemuan.
+
+---
+
+# 11. Application Architecture
+
+SkillSwap dirancang menggunakan arsitektur sederhana:
 
 ```text
 ┌─────────────────────┐
@@ -566,7 +597,7 @@ Secara umum aplikasi memiliki beberapa komponen:
            ↓
 ┌─────────────────────┐
 │   Firebase Auth     │
-│ Authentication      │
+│   Authentication    │
 └──────────┬──────────┘
            │
            ↓
@@ -575,18 +606,20 @@ Secara umum aplikasi memiliki beberapa komponen:
 │      Database       │
 └──────────┬──────────┘
            │
-           ├───────────────┐
-           ↓               ↓
-┌────────────────┐ ┌─────────────────┐
-│ Firebase       │ │ Firebase Cloud  │
-│ Storage        │ │ Messaging       │
-│ Profile Image  │ │ Notifications   │
-└────────────────┘ └─────────────────┘
+      ┌────┴─────┐
+      ↓          ↓
+┌───────────┐ ┌────────────────┐
+│ Firebase  │ │ Firebase Cloud │
+│ Storage   │ │ Messaging      │
+│           │ │                │
+│ Profile   │ │ Notification   │
+│ Image     │ │                │
+└───────────┘ └────────────────┘
 ```
 
 ---
 
-# 🗄️ Database Structure
+# 12. Database Structure
 
 ## Users
 
@@ -599,8 +632,6 @@ users
 ├── major
 ├── year
 ├── profile_picture
-├── level
-├── xp
 ├── rating
 ├── total_sessions
 └── created_at
@@ -631,7 +662,7 @@ user_skills
 └── level
 ```
 
-`type`:
+Type:
 
 ```text
 teach
@@ -722,26 +753,9 @@ reviews
 
 ---
 
-## Notifications
+# 13. Technology Stack
 
-```text
-notifications
-├── id
-├── user_id
-├── title
-├── message
-├── type
-├── read_status
-└── created_at
-```
-
----
-
-# 🛠️ Technology Stack
-
-Project ini dapat dikembangkan menggunakan:
-
-### Frontend
+## Frontend
 
 **Flutter**
 
@@ -749,16 +763,15 @@ Project ini dapat dikembangkan menggunakan:
 * Material Design
 * Responsive UI
 
-### Backend
+## Backend
 
 **Firebase**
 
 * Firebase Authentication
 * Cloud Firestore
 * Firebase Storage
-* Firebase Cloud Messaging
 
-### Development Tools
+## Development Tools
 
 * Android Studio
 * Visual Studio Code
@@ -767,260 +780,141 @@ Project ini dapat dikembangkan menggunakan:
 
 ---
 
-# 📦 Installation
+# 14. UI/UX Guidelines
 
-## 1. Clone Repository
+SkillSwap menggunakan konsep desain:
 
-```bash
-git clone https://github.com/username/skillswap.git
-```
+* Modern.
+* Clean.
+* Minimal.
+* Friendly.
+* Student-oriented.
+* Easy to navigate.
 
-Masuk ke folder project:
+Komponen UI:
 
-```bash
-cd skillswap
-```
+* Rounded cards.
+* Skill chips.
+* Progress indicators jika diperlukan.
+* Rating stars.
+* Bottom navigation.
+* Clear typography.
+* Empty states.
+* Loading states.
+* Error states.
 
----
-
-## 2. Install Dependencies
-
-```bash
-flutter pub get
-```
-
----
-
-## 3. Firebase Configuration
-
-Buat project baru pada Firebase Console.
-
-Aktifkan:
-
-* Authentication
-* Cloud Firestore
-* Firebase Storage
-* Firebase Cloud Messaging
-
-Kemudian hubungkan Firebase dengan aplikasi Flutter.
-
-Jika menggunakan FlutterFire CLI:
-
-```bash
-flutterfire configure
-```
+Desain dibuat sederhana agar pengguna dapat memahami fungsi aplikasi tanpa membutuhkan banyak langkah.
 
 ---
 
-## 4. Run Application
+# 15. Privacy & Safety
 
-Jalankan emulator atau sambungkan perangkat Android.
+Karena SkillSwap mempertemukan pengguna secara langsung, aspek keamanan menjadi perhatian.
 
-Kemudian:
+Fitur yang dapat digunakan:
 
-```bash
-flutter run
-```
+* Block user.
+* Report user.
+* Cancel session.
+* Rating system.
+* Community guidelines.
 
----
+Untuk pertemuan offline:
 
-# 📁 Project Structure
-
-Contoh struktur project:
-
-```text
-lib/
-│
-├── main.dart
-│
-├── core/
-│   ├── constants/
-│   ├── theme/
-│   └── utils/
-│
-├── models/
-│   ├── user_model.dart
-│   ├── skill_model.dart
-│   ├── session_model.dart
-│   ├── request_model.dart
-│   └── review_model.dart
-│
-├── services/
-│   ├── auth_service.dart
-│   ├── firestore_service.dart
-│   ├── matching_service.dart
-│   ├── notification_service.dart
-│   └── storage_service.dart
-│
-├── screens/
-│   ├── auth/
-│   ├── onboarding/
-│   ├── home/
-│   ├── discover/
-│   ├── chat/
-│   ├── session/
-│   └── profile/
-│
-├── widgets/
-│   ├── skill_card.dart
-│   ├── match_card.dart
-│   ├── session_card.dart
-│   ├── rating_widget.dart
-│   └── custom_button.dart
-│
-└── routes/
-    └── app_routes.dart
-```
-
----
-
-# 🎨 UI/UX Guidelines
-
-SkillSwap menggunakan prinsip desain:
-
-* Modern
-* Clean
-* Minimal
-* Friendly
-* Student-oriented
-* Easy to navigate
-
-Komponen yang digunakan:
-
-* Rounded cards
-* Skill chips
-* Progress bars
-* Rating stars
-* Bottom navigation
-* Floating action button jika diperlukan
-* Consistent spacing
-* Clear typography
-* Empty states
-* Loading states
-* Error states
-
-Hindari penggunaan terlalu banyak warna dan elemen dekoratif yang tidak memiliki fungsi.
-
----
-
-# 🔐 Privacy & Safety
-
-Karena SkillSwap mempertemukan pengguna, aspek keamanan perlu diperhatikan.
-
-Fitur keamanan:
-
-* Block user
-* Report user
-* Report inappropriate content
-* Cancel session
-* Rating system
-* Community guidelines
-
-Untuk pertemuan offline, pengguna disarankan bertemu di **tempat umum**.
+> Pengguna disarankan melakukan pertemuan di tempat umum seperti kampus, perpustakaan, cafe, atau study space.
 
 Aplikasi tidak menampilkan alamat pribadi pengguna.
 
 ---
 
-# 📊 Matching Algorithm
+# 16. Contoh Use Case
 
-Versi awal menggunakan sistem scoring sederhana.
+## Case 1 — Programming
 
-Contoh:
+Gabriel ingin belajar Python.
+
+Gabriel dapat mengajarkan UI/UX.
+
+Sistem menemukan Andi:
 
 ```text
-Skill Match          50%
-Reverse Skill Match 20%
-Schedule Match      15%
-Learning Mode       10%
-Rating               5%
+Gabriel
+Want to Learn:
+Python
+
+Can Teach:
+UI/UX
 ```
 
-Formula:
-
 ```text
-Match Score =
-(Skill Match × 0.50)
-+
-(Reverse Match × 0.20)
-+
-(Schedule Match × 0.15)
-+
-(Mode Match × 0.10)
-+
-(Rating × 0.05)
+Andi
+Can Teach:
+Python
+
+Want to Learn:
+UI/UX
 ```
 
-Hasil akhir dikonversi menjadi persentase.
-
-Contoh:
+Mereka memiliki kecocokan dua arah.
 
 ```text
-Skill Match: 100
-Reverse Match: 100
-Schedule Match: 80
-Mode Match: 100
-Rating: 90
-
-Final Score = 95.5%
+Gabriel ←──── Python ──── Andi
+Gabriel ───── UI/UX ────→ Andi
 ```
 
-Kemudian ditampilkan:
+Kemudian mereka dapat:
 
 ```text
-🎯 96% Match
+Match
+ ↓
+Request
+ ↓
+Accept
+ ↓
+Chat
+ ↓
+Schedule
+ ↓
+Learning Session
+ ↓
+Rating
 ```
 
 ---
 
-# 🎯 MVP Scope
+## Case 2 — Design
 
-Untuk versi pertama, fitur yang wajib dibuat adalah:
+Sarah ingin belajar Photoshop.
 
-* [x] Authentication
-* [x] User Profile
-* [x] Skill Selection
-* [x] Teach / Learn Skill
-* [x] Skill Discovery
-* [x] Matching
-* [x] SkillSwap Request
-* [x] Chat
-* [x] Session Scheduling
-* [x] Rating & Review
+Kevin dapat mengajarkan Photoshop tetapi ingin belajar Public Speaking.
 
-Fitur tambahan:
+Sarah dapat mengajarkan Public Speaking.
 
-* [ ] XP
-* [ ] Achievement
-* [ ] Learning Progress
-* [ ] Notification
-* [ ] Leaderboard
-* [ ] AI Recommendation
-* [ ] Calendar Integration
+Sistem dapat mempertemukan Sarah dan Kevin berdasarkan kecocokan tersebut.
 
 ---
 
-# 🚀 Future Development
+# 17. Future Development
 
-Pengembangan selanjutnya dapat mencakup:
+Apabila SkillSwap dikembangkan lebih lanjut, beberapa fitur dapat ditambahkan.
 
 ### AI Skill Recommendation
 
-AI menganalisis:
+Sistem dapat menganalisis:
 
-* Skill
-* Riwayat belajar
-* Session
-* Rating
-* Preferensi pengguna
+* Skill.
+* Riwayat belajar.
+* Session.
+* Rating.
+* Preferensi pengguna.
 
-Kemudian memberikan rekomendasi skill.
+Kemudian memberikan rekomendasi skill dan pengguna yang lebih personal.
 
 ---
 
 ### Skill Assessment
 
-Pengguna dapat mengikuti quiz untuk menentukan level skill.
+Pengguna dapat mengikuti quiz untuk mengetahui level skill.
 
 Contoh:
 
@@ -1056,147 +950,181 @@ Python Learning Roadmap
 
 Ranking berdasarkan:
 
-* XP
-* Session
-* Teaching
-* Rating
-* Contribution
-
-Contoh:
-
-```text
-🏆 SkillSwap Leaderboard
-
-1. Andi       2,450 XP
-2. Sarah      2,210 XP
-3. Gabriel    1,980 XP
-```
+* XP.
+* Jumlah session.
+* Teaching.
+* Rating.
+* Contribution.
 
 ---
 
-# 🌟 Unique Selling Point
+# 18. Unique Selling Point
 
-SkillSwap memiliki konsep yang berbeda dari aplikasi belajar biasa.
+SkillSwap memiliki konsep yang berbeda dari aplikasi pembelajaran biasa.
 
-Aplikasi tidak hanya bertanya:
+Aplikasi tidak hanya berfokus pada:
 
-> **"Apa yang ingin kamu pelajari?"**
+> **Learn**
 
-Tetapi juga:
+tetapi juga:
 
-> **"Apa yang bisa kamu ajarkan?"**
+> **Teach**
 
-Konsep utama:
+Konsep:
 
 ```text
            TEACH
              ↓
-        ┌──────────┐
-        │ SkillSwap│
-        └──────────┘
+      ┌──────────────┐
+      │  SkillSwap   │
+      └──────────────┘
              ↓
            LEARN
 ```
 
-Pengguna bukan hanya menjadi **learner**, tetapi juga dapat menjadi **mentor** bagi orang lain.
+Setiap pengguna memiliki kesempatan untuk menjadi **learner sekaligus mentor**.
+
+Hal tersebut membuat proses pembelajaran bersifat:
+
+**Two-way learning.**
 
 ---
 
-# 📚 Example Use Case
+# 19. Project Goals
 
-### Case 1 — Programming
+Tujuan utama SkillSwap:
 
-Gabriel ingin belajar Python.
-
-Gabriel dapat mengajarkan UI/UX.
-
-Sistem menemukan Andi.
-
-Andi dapat mengajarkan Python dan ingin belajar UI/UX.
-
-**Result: 100% SkillSwap Match**
+1. Mempermudah mahasiswa menemukan teman belajar.
+2. Memfasilitasi pertukaran skill antar mahasiswa.
+3. Membangun komunitas belajar berbasis peer-to-peer.
+4. Membantu mahasiswa mengembangkan kemampuan di luar perkuliahan.
+5. Memberikan pengalaman belajar yang lebih sosial dan interaktif.
+6. Membuat proses berbagi pengetahuan menjadi lebih mudah.
 
 ---
 
-### Case 2 — Design
+# 20. Development Status
 
-Sarah ingin belajar Photoshop.
+**Status:** `In Development`
 
-Kevin dapat mengajarkan Photoshop tetapi ingin belajar Public Speaking.
+**Version:** `v1.0.0`
 
-Sarah dapat mengajarkan Public Speaking.
+### Development Focus
 
-Sistem mempertemukan Sarah dan Kevin.
-
----
-
-# 👥 Target Community
-
-SkillSwap dapat digunakan oleh:
-
-* Mahasiswa dalam satu universitas.
-* Organisasi mahasiswa.
-* Komunitas kampus.
-* Antaruniversitas.
-* Komunitas profesional pemula.
-
-Versi awal project difokuskan pada **mahasiswa** agar scope tetap terkontrol.
+* Authentication.
+* User Profile.
+* Skill Management.
+* Skill Discovery.
+* Matching System.
+* SkillSwap Request.
+* Chat.
+* Session Management.
+* Rating System.
 
 ---
 
-# 📈 Project Goals
+# 21. Installation
 
-Keberhasilan aplikasi dapat diukur melalui:
+## 1. Clone Repository
 
-* Jumlah pengguna aktif.
-* Jumlah SkillSwap request.
-* Jumlah session yang selesai.
-* Jumlah skill yang dipertukarkan.
-* Rating pengguna.
-* Jumlah skill yang berhasil dipelajari.
+```bash
+git clone https://github.com/username/skillswap.git
+```
 
-Contoh target MVP:
+Masuk ke folder project:
 
-```text
-100 Users
-50 SkillSwap Matches
-30 Completed Sessions
-20 Different Skills
-4.5+ Average Rating
+```bash
+cd skillswap
 ```
 
 ---
 
-# 👨‍💻 Development Status
+## 2. Install Dependencies
 
-**Status:** `In Development`
-
-### Current Version
-
-`v1.0.0`
-
-### Development Focus
-
-* UI/UX
-* Authentication
-* Skill Management
-* Matching System
-* SkillSwap Request
-* Chat
-* Session Management
-* Rating System
+```bash
+flutter pub get
+```
 
 ---
 
-# 📄 License
+## 3. Firebase Configuration
 
-Project ini dibuat untuk tujuan **pembelajaran dan tugas akademik**.
+Buat project baru pada Firebase kemudian aktifkan:
 
-© 2026 SkillSwap Team. All Rights Reserved.
+* Authentication.
+* Cloud Firestore.
+* Firebase Storage.
+
+Jika menggunakan FlutterFire CLI:
+
+```bash
+flutterfire configure
+```
 
 ---
 
-# 👨‍🎓 Academic Project
+## 4. Run Application
+
+Jalankan emulator atau sambungkan perangkat Android.
+
+Kemudian:
+
+```bash
+flutter run
+```
+
+---
+
+# 22. Project Structure
+
+Contoh struktur project:
+
+```text
+lib/
+│
+├── main.dart
+│
+├── core/
+│   ├── constants/
+│   ├── theme/
+│   └── utils/
+│
+├── models/
+│   ├── user_model.dart
+│   ├── skill_model.dart
+│   ├── session_model.dart
+│   ├── request_model.dart
+│   └── review_model.dart
+│
+├── services/
+│   ├── auth_service.dart
+│   ├── firestore_service.dart
+│   ├── matching_service.dart
+│   └── storage_service.dart
+│
+├── screens/
+│   ├── auth/
+│   ├── onboarding/
+│   ├── home/
+│   ├── discover/
+│   ├── chat/
+│   ├── session/
+│   └── profile/
+│
+├── widgets/
+│   ├── skill_card.dart
+│   ├── match_card.dart
+│   ├── session_card.dart
+│   ├── rating_widget.dart
+│   └── custom_button.dart
+│
+└── routes/
+    └── app_routes.dart
+```
+
+---
+
+# 23. Academic Project
 
 **Project:** SkillSwap
 **Category:** Mobile Programming
@@ -1204,10 +1132,46 @@ Project ini dibuat untuk tujuan **pembelajaran dan tugas akademik**.
 **Target User:** University Students
 **Concept:** Peer-to-Peer Skill Exchange
 
+Project ini dibuat untuk tujuan **pembelajaran dan tugas akademik**.
+
 ---
 
-## 💡 Tagline
+# 📌 Project Summary
+
+SkillSwap adalah aplikasi mobile yang mempertemukan mahasiswa berdasarkan skill yang dapat mereka ajarkan dan skill yang ingin mereka pelajari.
+
+Masalah utama yang diselesaikan adalah kesulitan mahasiswa dalam menemukan teman belajar yang sesuai.
+
+Core workflow aplikasi:
+
+```text
+Register
+   ↓
+Profile
+   ↓
+Select Skills
+   ↓
+Discover
+   ↓
+Match
+   ↓
+SkillSwap Request
+   ↓
+Chat
+   ↓
+Schedule
+   ↓
+Learning Session
+   ↓
+Rating & Review
+```
+
+Dengan scope yang dibatasi pada fitur inti tersebut, **SkillSwap dirancang agar MVP dapat dikembangkan secara realistis dalam 12 pertemuan**.
+
+---
+
+# 💡 Tagline
 
 > **Learn something new. Teach what you know. Swap your skills.**
 
-**SkillSwap — Learn. Teach. Swap.**
+### SkillSwap — Learn. Teach. Swap.
