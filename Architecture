@@ -1,0 +1,259 @@
+Architecture: SkillSwap 
+Dokumen ini merangkum spesifikasi arsitektur, tumpukan teknologi, struktur database, aturan sistem, dan fitur aplikasi untuk SkillSwap, sebuah platform peer-to-peer skill exchange bagi mahasiswa.
+
+1. Tumpukan Teknologi (Tech Stack)
+Aplikasi ini menggunakan arsitektur Client-Serverless, di mana aplikasi mobile berinteraksi langsung dengan layanan berbasis cloud dari Google Firebase.
+
+Frontend Mobile: Flutter + Dart
+
+Antarmuka (UI): Material Design 3
+
+Backend & Autentikasi: Firebase Authentication
+
+Database: Cloud Firestore (NoSQL)
+
+Penyimpanan File: Firebase Storage (untuk foto profil)
+
+State Management: Provider / BLoC / GetX (pilih salah satu)
+
+2. Visualisasi Arsitektur (Mermaid)
+Code snippet
+graph TD
+    subgraph Client Application
+        A[Flutter Mobile App<br>UI & Business Logic]
+    end
+
+    subgraph Firebase Cloud Services
+        B[Firebase Auth<br>Email & Password]
+        C[(Cloud Firestore<br>NoSQL Database)]
+        D[Firebase Storage<br>Media Storage]
+    end
+
+    A -- 1. Authentication --> B
+    A -- 2. CRUD & Real-time Stream --> C
+    A -- 3. Upload Profile Image --> D
+    
+    classDef flutter fill:#42a5f5,stroke:#000,stroke-width:2px,color:#fff;
+    classDef firebase fill:#ffca28,stroke:#000,stroke-width:2px,color:#000;
+    
+    class A flutter;
+    class B,C,D firebase;
+
+3. Entitas Utama (Struktur Cloud Firestore)
+Karena menggunakan NoSQL, relasi antar data dilakukan menggunakan Document ID.
+
+1. Users (users)
+
+id (Document ID)
+
+name (String)
+
+email (String)
+
+university (String)
+
+major (String)
+
+year (String)
+
+profile_picture (String URL)
+
+rating (Number / Double)
+
+total_sessions (Number)
+
+createdAt (Timestamp)
+
+2. Skills (skills)
+
+id (Document ID)
+
+name (String)
+
+category (String)
+
+3. User Skills (user_skills)
+
+id (Document ID)
+
+user_id (Reference / String ID)
+
+skill_id (Reference / String ID)
+
+type (String - Enum: teach, learn)
+
+level (String - Opsional)
+
+4. SkillSwap Requests (requests)
+
+id (Document ID)
+
+sender_id (Reference / String ID)
+
+receiver_id (Reference / String ID)
+
+teach_skill (String)
+
+learn_skill (String)
+
+message (String)
+
+status (String - Enum: pending, accepted, declined, cancelled)
+
+createdAt (Timestamp)
+
+5. Sessions (sessions)
+
+id (Document ID)
+
+teacher_id (Reference / String ID)
+
+learner_id (Reference / String ID)
+
+skill_id (Reference / String ID)
+
+date (Timestamp)
+
+start_time (String)
+
+end_time (String)
+
+mode (String - Enum: online, offline)
+
+meeting_link (String - Opsional)
+
+status (String - Enum: upcoming, ongoing, completed, cancelled)
+
+createdAt (Timestamp)
+
+6. Messages (messages)
+
+id (Document ID)
+
+sender_id (Reference / String ID)
+
+receiver_id (Reference / String ID)
+
+message (String)
+
+timestamp (Timestamp)
+
+read_status (Boolean)
+
+7. Reviews (reviews)
+
+id (Document ID)
+
+reviewer_id (Reference / String ID)
+
+reviewed_user_id (Reference / String ID)
+
+session_id (Reference / String ID)
+
+rating (Number)
+
+comment (String)
+
+createdAt (Timestamp)
+
+4. Aturan Database (Firestore Security Rules)
+Isolasi Profil: Pengguna hanya dapat mengubah (Update/Delete) dokumen profilnya sendiri di koleksi users.
+
+Validasi Skill Ganda: Seorang mahasiswa tidak boleh menyimpan skill_id yang sama ke dalam kategori teach dan learn secara bersamaan.
+
+Keamanan Obrolan (Chat): Dokumen di koleksi messages hanya boleh dibaca (read) dan ditulis (write) oleh sender_id atau receiver_id yang bersangkutan.
+
+Data Historis (No Hard Delete): Sesi belajar (sessions) dan permintaan (requests) tidak boleh dihapus dari database. Jika dibatalkan, statusnya hanya diubah menjadi cancelled atau declined.
+
+5. Fitur Utama Backend (Layanan Dart/Firebase Services)
+Meskipun tidak memiliki backend Node.js, logika ini berjalan di lapisan Service pada Flutter:
+
+1. Authentication Engine
+
+Register pengguna menggunakan Email/Password.
+
+Otomatis membuat dokumen baru di koleksi users sesaat setelah autentikasi berhasil.
+
+2. Profile & Skill Management (CRUD)
+
+Baca/Tulis data profil mahasiswa.
+
+Tambahkan skill yang ingin diajarkan (I Can Teach) atau dipelajari (I Want to Learn).
+
+3. Matching Algorithm (Scoring System)
+
+Menghitung kecocokan pengguna secara rule-based tanpa AI.
+
+Formula: (Skill Match 50%) + (Reverse Match 20%) + (Schedule Match 15%) + (Mode Match 10%) + (Rating 5%).
+
+Sistem hanya menampilkan pengguna dengan skor kecocokan tertinggi.
+
+4. Request & Session Controller
+
+Kirim permintaan SkillSwap dengan pesan.
+
+Penerima dapat mengubah status dokumen request menjadi accepted.
+
+Otomatis membuat dokumen sessions setelah jadwal disepakati di ruang obrolan.
+
+5. Real-time Chat Controller
+
+Membaca data messages menggunakan fitur Stream/Snapshot Listener agar pesan baru muncul secara real-time.
+
+Memperbarui read_status menjadi true saat obrolan dibuka.
+
+6. Halaman Antarmuka (Frontend Pages)
+1. Onboarding & Auth
+
+Halaman Splash, Register, dan Login.
+
+2. Lengkapi Profil & Pemilihan Skill
+
+Formulir pengisian Universitas, Jurusan, dan Angkatan.
+
+Tampilan chips/tags untuk memilih skill "Can Teach" dan "Want to Learn".
+
+3. Home / Dashboard
+
+Menampilkan ringkasan sesi yang akan datang (Upcoming Sessions).
+
+Menampilkan rekomendasi partner belajar (berdasarkan persentase match).
+
+4. Discover & Match Profile
+
+Kolom pencarian skill berdasarkan kategori (Programming, Design, Language, dll).
+
+Tampilan detail profil mahasiswa (Rating, Skill, Mode Belajar).
+
+Tombol: Kirim SkillSwap Request.
+
+5. Pesan & Obrolan (Chat)
+
+Daftar riwayat chat dengan penanda pesan belum dibaca.
+
+Ruang obrolan real-time untuk berdiskusi dan menyepakati jadwal belajar.
+
+6. Penjadwalan & Sesi Belajar
+
+Formulir pembuatan sesi belajar (Tanggal, Jam, Online/Offline).
+
+Halaman detail sesi aktif.
+
+Tombol untuk menandai sesi telah "Selesai" (Completed).
+
+7. Rating & Review
+
+Muncul otomatis setelah sesi selesai.
+
+Formulir input Bintang 1-5 dan ulasan komentar pengalaman belajar.
+
+7. Persyaratan UI/UX (UI Requirements)
+Tema Desain: Modern, bersih, minimalis, dan student-oriented.
+
+Komponen Utama: Menggunakan Rounded cards (kartu bersudut melengkung), Skill chips, indikator loading, dan tata letak bottom navigation bar.
+
+Bahasa: Antarmuka menggunakan Bahasa Indonesia, namun istilah kunci seperti Can Teach dan Want to Learn dapat dipertahankan.
+
+Empty States: Tampilkan ilustrasi atau pesan yang ramah saat tidak ada data (misalnya: "Belum ada pesan" atau "Belum ada sesi belajar").
+
+Struktur Proyek Flutter (Clean Code): Memisahkan folder models/, services/, screens/, widgets/, dan core/ dengan jelas.
