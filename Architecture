@@ -655,7 +655,3 @@ Provider tinggal `try { ... } catch (AppException e) { state = ViewState.error; 
 * **Race condition sederhana**: saat dua pihak menerima request bersamaan (jarang terjadi di skala kecil), cukup andalkan `status` field di dokumen request sebagai penentu — request yang statusnya sudah berubah dari `pending` akan ditolak otomatis oleh security rules.
 
 ---
-
-### Referensi
-
-Dokumen ini melengkapi `README.md` — untuk detail fitur, database schema per koleksi, dan use case, lihat kembali README bagian 4, 10, 12, dan 16.
