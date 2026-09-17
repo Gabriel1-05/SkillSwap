@@ -1,259 +1,663 @@
-Architecture: SkillSwap 
-Dokumen ini merangkum spesifikasi arsitektur, tumpukan teknologi, struktur database, aturan sistem, dan fitur aplikasi untuk SkillSwap, sebuah platform peer-to-peer skill exchange bagi mahasiswa.
+# SkillSwap — Architecture Documentation 🏗️
 
-1. Tumpukan Teknologi (Tech Stack)
-Aplikasi ini menggunakan arsitektur Client-Serverless, di mana aplikasi mobile berinteraksi langsung dengan layanan berbasis cloud dari Google Firebase.
+Dokumen ini menjelaskan arsitektur teknis aplikasi **SkillSwap**, lanjutan dari `README.md`. Fokusnya: bagaimana layer-layer aplikasi disusun, bagaimana data mengalir, dan bagaimana Firebase digunakan sebagai backend.
 
-Frontend Mobile: Flutter + Dart
+> Catatan: Arsitektur ini sengaja dibuat **sederhana** (bukan full Clean Architecture dengan banyak abstraction layer) agar realistis dikerjakan dalam 12 pertemuan, sambil tetap terstruktur dan mudah dikembangkan.
 
-Antarmuka (UI): Material Design 3
+---
 
-Backend & Autentikasi: Firebase Authentication
+## 1. Prinsip Arsitektur
 
-Database: Cloud Firestore (NoSQL)
+* **Simple layered architecture** — bukan clean architecture penuh, tapi tetap memisahkan tanggung jawab per layer.
+* **Single source of truth** — Firestore adalah sumber data utama, UI tidak pernah menyimpan state permanen sendiri.
+* **Service layer sebagai jembatan** — semua komunikasi ke Firebase (Auth, Firestore, Storage) wajib lewat `services/`, tidak boleh dipanggil langsung dari UI/screen.
+* **State management terpusat** — perubahan state (login, list match, chat, dsb) dikelola lewat Provider, bukan `setState` tersebar di banyak widget.
 
-Penyimpanan File: Firebase Storage (untuk foto profil)
+---
 
-State Management: Provider / BLoC / GetX (pilih salah satu)
+## 2. Layer Aplikasi
 
-2. Visualisasi Arsitektur (Mermaid)
-Code snippet
+```text
+┌─────────────────────────────────────────┐
+│              PRESENTATION                │
+│      screens/  +  widgets/                │
+│   (UI, tidak berisi logic bisnis)         │
+└───────────────────┬───────────────────────┘
+                     │ listen / call
+┌───────────────────▼───────────────────────┐
+│              STATE MANAGEMENT              │
+│                 providers/                 │
+│   (menyimpan state, notify UI saat berubah)│
+└───────────────────┬───────────────────────┘
+                     │ call method
+┌───────────────────▼───────────────────────┐
+│                SERVICE LAYER               │
+│                 services/                  │
+│  auth_service, firestore_service,          │
+│  matching_service, storage_service         │
+└───────────────────┬───────────────────────┘
+                     │ read/write
+┌───────────────────▼───────────────────────┐
+│                 DATA LAYER                 │
+│     Firebase Auth · Firestore · Storage    │
+└─────────────────────────────────────────────┘
+```
+
+**Aturan arah dependency:** panah hanya boleh ke bawah. Screen tidak boleh import Firebase langsung, Provider tidak boleh import widget, dst.
+
+### Diagram (Mermaid)
+
+```mermaid
 graph TD
-    subgraph Client Application
-        A[Flutter Mobile App<br>UI & Business Logic]
-    end
-
-    subgraph Firebase Cloud Services
-        B[Firebase Auth<br>Email & Password]
-        C[(Cloud Firestore<br>NoSQL Database)]
-        D[Firebase Storage<br>Media Storage]
-    end
-
-    A -- 1. Authentication --> B
-    A -- 2. CRUD & Real-time Stream --> C
-    A -- 3. Upload Profile Image --> D
-    
-    classDef flutter fill:#42a5f5,stroke:#000,stroke-width:2px,color:#fff;
-    classDef firebase fill:#ffca28,stroke:#000,stroke-width:2px,color:#000;
-    
-    class A flutter;
-    class B,C,D firebase;
-
-3. Entitas Utama (Struktur Cloud Firestore)
-Karena menggunakan NoSQL, relasi antar data dilakukan menggunakan Document ID.
-
-1. Users (users)
-
-id (Document ID)
-
-name (String)
-
-email (String)
-
-university (String)
-
-major (String)
-
-year (String)
-
-profile_picture (String URL)
-
-rating (Number / Double)
-
-total_sessions (Number)
-
-createdAt (Timestamp)
-
-2. Skills (skills)
-
-id (Document ID)
-
-name (String)
-
-category (String)
-
-3. User Skills (user_skills)
-
-id (Document ID)
-
-user_id (Reference / String ID)
-
-skill_id (Reference / String ID)
-
-type (String - Enum: teach, learn)
-
-level (String - Opsional)
-
-4. SkillSwap Requests (requests)
-
-id (Document ID)
-
-sender_id (Reference / String ID)
-
-receiver_id (Reference / String ID)
-
-teach_skill (String)
-
-learn_skill (String)
-
-message (String)
-
-status (String - Enum: pending, accepted, declined, cancelled)
-
-createdAt (Timestamp)
-
-5. Sessions (sessions)
-
-id (Document ID)
-
-teacher_id (Reference / String ID)
-
-learner_id (Reference / String ID)
-
-skill_id (Reference / String ID)
-
-date (Timestamp)
-
-start_time (String)
-
-end_time (String)
-
-mode (String - Enum: online, offline)
-
-meeting_link (String - Opsional)
-
-status (String - Enum: upcoming, ongoing, completed, cancelled)
-
-createdAt (Timestamp)
-
-6. Messages (messages)
-
-id (Document ID)
-
-sender_id (Reference / String ID)
-
-receiver_id (Reference / String ID)
-
-message (String)
-
-timestamp (Timestamp)
-
-read_status (Boolean)
-
-7. Reviews (reviews)
-
-id (Document ID)
-
-reviewer_id (Reference / String ID)
-
-reviewed_user_id (Reference / String ID)
-
-session_id (Reference / String ID)
-
-rating (Number)
-
-comment (String)
-
-createdAt (Timestamp)
-
-4. Aturan Database (Firestore Security Rules)
-Isolasi Profil: Pengguna hanya dapat mengubah (Update/Delete) dokumen profilnya sendiri di koleksi users.
-
-Validasi Skill Ganda: Seorang mahasiswa tidak boleh menyimpan skill_id yang sama ke dalam kategori teach dan learn secara bersamaan.
-
-Keamanan Obrolan (Chat): Dokumen di koleksi messages hanya boleh dibaca (read) dan ditulis (write) oleh sender_id atau receiver_id yang bersangkutan.
-
-Data Historis (No Hard Delete): Sesi belajar (sessions) dan permintaan (requests) tidak boleh dihapus dari database. Jika dibatalkan, statusnya hanya diubah menjadi cancelled atau declined.
-
-5. Fitur Utama Backend (Layanan Dart/Firebase Services)
-Meskipun tidak memiliki backend Node.js, logika ini berjalan di lapisan Service pada Flutter:
-
-1. Authentication Engine
-
-Register pengguna menggunakan Email/Password.
-
-Otomatis membuat dokumen baru di koleksi users sesaat setelah autentikasi berhasil.
-
-2. Profile & Skill Management (CRUD)
-
-Baca/Tulis data profil mahasiswa.
-
-Tambahkan skill yang ingin diajarkan (I Can Teach) atau dipelajari (I Want to Learn).
-
-3. Matching Algorithm (Scoring System)
-
-Menghitung kecocokan pengguna secara rule-based tanpa AI.
-
-Formula: (Skill Match 50%) + (Reverse Match 20%) + (Schedule Match 15%) + (Mode Match 10%) + (Rating 5%).
-
-Sistem hanya menampilkan pengguna dengan skor kecocokan tertinggi.
-
-4. Request & Session Controller
-
-Kirim permintaan SkillSwap dengan pesan.
-
-Penerima dapat mengubah status dokumen request menjadi accepted.
-
-Otomatis membuat dokumen sessions setelah jadwal disepakati di ruang obrolan.
-
-5. Real-time Chat Controller
-
-Membaca data messages menggunakan fitur Stream/Snapshot Listener agar pesan baru muncul secara real-time.
-
-Memperbarui read_status menjadi true saat obrolan dibuka.
-
-6. Halaman Antarmuka (Frontend Pages)
-1. Onboarding & Auth
-
-Halaman Splash, Register, dan Login.
-
-2. Lengkapi Profil & Pemilihan Skill
-
-Formulir pengisian Universitas, Jurusan, dan Angkatan.
-
-Tampilan chips/tags untuk memilih skill "Can Teach" dan "Want to Learn".
-
-3. Home / Dashboard
-
-Menampilkan ringkasan sesi yang akan datang (Upcoming Sessions).
-
-Menampilkan rekomendasi partner belajar (berdasarkan persentase match).
-
-4. Discover & Match Profile
-
-Kolom pencarian skill berdasarkan kategori (Programming, Design, Language, dll).
-
-Tampilan detail profil mahasiswa (Rating, Skill, Mode Belajar).
-
-Tombol: Kirim SkillSwap Request.
-
-5. Pesan & Obrolan (Chat)
-
-Daftar riwayat chat dengan penanda pesan belum dibaca.
-
-Ruang obrolan real-time untuk berdiskusi dan menyepakati jadwal belajar.
-
-6. Penjadwalan & Sesi Belajar
-
-Formulir pembuatan sesi belajar (Tanggal, Jam, Online/Offline).
-
-Halaman detail sesi aktif.
-
-Tombol untuk menandai sesi telah "Selesai" (Completed).
-
-7. Rating & Review
-
-Muncul otomatis setelah sesi selesai.
-
-Formulir input Bintang 1-5 dan ulasan komentar pengalaman belajar.
-
-7. Persyaratan UI/UX (UI Requirements)
-Tema Desain: Modern, bersih, minimalis, dan student-oriented.
-
-Komponen Utama: Menggunakan Rounded cards (kartu bersudut melengkung), Skill chips, indikator loading, dan tata letak bottom navigation bar.
-
-Bahasa: Antarmuka menggunakan Bahasa Indonesia, namun istilah kunci seperti Can Teach dan Want to Learn dapat dipertahankan.
-
-Empty States: Tampilkan ilustrasi atau pesan yang ramah saat tidak ada data (misalnya: "Belum ada pesan" atau "Belum ada sesi belajar").
-
-Struktur Proyek Flutter (Clean Code): Memisahkan folder models/, services/, screens/, widgets/, dan core/ dengan jelas.
+    A[Screens & Widgets] --> B[Providers - State Management]
+    B --> C[Services Layer]
+    C --> D[(Firebase Auth)]
+    C --> E[(Cloud Firestore)]
+    C --> F[(Firebase Storage)]
+    C --> G[(Firebase Cloud Messaging)]
+```
+
+---
+
+## 3. Struktur Folder (Detail)
+
+Perluasan dari struktur di README, sekarang ditambah folder `providers/`:
+
+```text
+lib/
+│
+├── main.dart
+│
+├── core/
+│   ├── constants/          # warna, string, ukuran, dsb
+│   ├── theme/               # ThemeData Flutter
+│   └── utils/                # helper function (format tanggal, validasi, dll)
+│
+├── models/
+│   ├── user_model.dart
+│   ├── skill_model.dart
+│   ├── user_skill_model.dart
+│   ├── request_model.dart
+│   ├── session_model.dart
+│   ├── message_model.dart
+│   └── review_model.dart
+│
+├── services/
+│   ├── auth_service.dart
+│   ├── firestore_service.dart
+│   ├── matching_service.dart
+│   ├── storage_service.dart
+│   └── chat_service.dart
+│
+├── providers/
+│   ├── auth_provider.dart
+│   ├── profile_provider.dart
+│   ├── discover_provider.dart
+│   ├── match_provider.dart
+│   ├── request_provider.dart
+│   ├── chat_provider.dart
+│   └── session_provider.dart
+│
+├── screens/
+│   ├── auth/                 # login, register
+│   ├── onboarding/           # complete profile, select skill, availability
+│   ├── home/
+│   ├── discover/              # skill discovery + matching result
+│   ├── request/                # kirim / terima skillswap request
+│   ├── chat/
+│   ├── session/                # scheduling, detail session
+│   └── profile/
+│
+├── widgets/
+│   ├── skill_card.dart
+│   ├── match_card.dart
+│   ├── session_card.dart
+│   ├── rating_widget.dart
+│   ├── chat_bubble.dart
+│   ├── empty_state.dart
+│   ├── loading_state.dart
+│   └── custom_button.dart
+│
+└── routes/
+    └── app_routes.dart
+```
+
+**Kenapa ada `providers/` terpisah dari `services/`?**
+`services/` fokus pada *bagaimana* mengambil/menyimpan data (Firebase calls). `providers/` fokus pada *state apa* yang dipegang UI saat ini (loading, data, error) dan kapan UI perlu rebuild.
+
+---
+
+## 4. Tanggung Jawab Tiap Service
+
+| Service | Tanggung Jawab |
+|---|---|
+| `auth_service.dart` | Register, login, logout, cek status login, reset password |
+| `firestore_service.dart` | CRUD generic untuk users, skills, user_skills, requests, sessions, reviews |
+| `matching_service.dart` | Hitung skor matching antar pengguna (lihat bagian 7) |
+| `storage_service.dart` | Upload & ambil URL foto profil dari Firebase Storage |
+| `chat_service.dart` | Kirim pesan, listen pesan real-time, update read status |
+
+Contoh kontrak method (bukan implementasi final, sekadar acuan struktur):
+
+```dart
+// auth_service.dart
+Future<UserModel> register(String email, String password, String name);
+Future<UserModel> login(String email, String password);
+Future<void> logout();
+Stream<User?> get authStateChanges;
+
+// firestore_service.dart
+Future<void> saveUserSkills(String userId, List<UserSkillModel> skills);
+Future<List<UserModel>> getPotentialMatches(String userId);
+Future<void> sendRequest(RequestModel request);
+Future<void> updateRequestStatus(String requestId, String status);
+Future<void> createSession(SessionModel session);
+Future<void> saveReview(ReviewModel review);
+
+// matching_service.dart
+double calculateMatchScore(UserModel currentUser, UserModel targetUser);
+List<MatchResult> getRankedMatches(UserModel currentUser, List<UserModel> candidates);
+```
+
+---
+
+## 5. Alur Data (Sequence Diagrams)
+
+Pola umum di semua flow: **Screen → Provider → Service → Firestore**, lalu balik lewat `notifyListeners()`. Berikut rincian untuk tiap flow utama.
+
+### 5.1 Proses Matching
+
+```mermaid
+sequenceDiagram
+    participant UI as Discover Screen
+    participant P as DiscoverProvider
+    participant M as MatchingService
+    participant F as FirestoreService
+    participant DB as Cloud Firestore
+
+    UI->>P: openDiscoverPage()
+    P->>F: getPotentialMatches(userId)
+    F->>DB: query users + user_skills
+    DB-->>F: list of candidate users
+    F-->>P: List<UserModel>
+    P->>M: getRankedMatches(currentUser, candidates)
+    M-->>P: List<MatchResult> (sorted by score)
+    P-->>UI: notifyListeners() -> render match cards
+```
+
+### 5.2 Proses SkillSwap Request (Kirim & Terima)
+
+```mermaid
+sequenceDiagram
+    participant UIa as Profile Screen (Sender)
+    participant Pa as RequestProvider
+    participant F as FirestoreService
+    participant DB as Cloud Firestore
+    participant UIb as Inbox Screen (Receiver)
+
+    UIa->>Pa: sendRequest(teachSkill, learnSkill, message)
+    Pa->>F: sendRequest(RequestModel)
+    F->>DB: create doc in requests (status: pending)
+    DB-->>F: ok
+    F-->>Pa: success
+    Pa-->>UIa: tampilkan "Request terkirim"
+
+    UIb->>Pa: openInbox()
+    Pa->>F: getIncomingRequests(userId)
+    F->>DB: query requests where receiver_id == userId
+    DB-->>F: list requests
+    F-->>Pa: List<RequestModel>
+    Pa-->>UIb: render request cards
+
+    UIb->>Pa: acceptRequest(requestId)
+    Pa->>F: updateRequestStatus(requestId, "accepted")
+    F->>DB: update doc status -> accepted
+    DB-->>F: ok
+    F-->>Pa: success
+    Pa-->>UIb: buka Chat
+```
+
+### 5.3 Proses Chat (Real-time)
+
+```mermaid
+sequenceDiagram
+    participant UI as Chat Screen
+    participant P as ChatProvider
+    participant C as ChatService
+    participant DB as Cloud Firestore
+
+    UI->>P: openChat(conversationId)
+    P->>C: listenMessages(conversationId)
+    C->>DB: stream snapshot on messages where conversation_id == id
+    DB-->>C: onSnapshot (real-time)
+    C-->>P: Stream<List<MessageModel>>
+    P-->>UI: notifyListeners() -> render bubble chat
+
+    UI->>P: sendMessage(text)
+    P->>C: sendMessage(MessageModel)
+    C->>DB: create doc in messages
+    DB-->>C: ok (trigger snapshot listener otomatis)
+```
+
+> Chat tidak pakai polling manual — cukup `snapshots()` stream dari Firestore, jadi pesan baru otomatis muncul tanpa refresh.
+
+### 5.4 Proses Session Scheduling & Completion
+
+```mermaid
+sequenceDiagram
+    participant UI as Session Screen
+    participant P as SessionProvider
+    participant F as FirestoreService
+    participant DB as Cloud Firestore
+
+    UI->>P: scheduleSession(skill, date, time, mode)
+    P->>F: createSession(SessionModel status: upcoming)
+    F->>DB: create doc in sessions
+    DB-->>F: ok
+    F-->>P: success
+    P-->>UI: tampilkan jadwal di kalender sesi
+
+    Note over UI,DB: Saat waktu sesi tiba/lewat
+    UI->>P: markSessionCompleted(sessionId)
+    P->>F: updateSessionStatus(sessionId, "completed")
+    F->>DB: update doc status -> completed
+    DB-->>F: ok
+    F-->>P: success
+    P-->>UI: arahkan ke halaman Rating & Review
+```
+
+### 5.5 Proses Rating & Review
+
+```mermaid
+sequenceDiagram
+    participant UI as Rating Screen
+    participant P as SessionProvider
+    participant F as FirestoreService
+    participant DB as Cloud Firestore
+
+    UI->>P: submitReview(sessionId, rating, comment)
+    P->>F: saveReview(ReviewModel)
+    F->>DB: create doc in reviews
+    F->>DB: update users/{reviewedUserId}.rating (recalculate average)
+    DB-->>F: ok
+    F-->>P: success
+    P-->>UI: tampilkan "Terima kasih atas review-nya" -> kembali ke Home
+```
+
+---
+
+## 6. Firebase Architecture
+
+### 6.1 Cloud Firestore — Struktur Koleksi
+
+```text
+users/{userId}
+skills/{skillId}
+user_skills/{userSkillId}
+requests/{requestId}
+sessions/{sessionId}
+messages/{messageId}
+reviews/{reviewId}
+```
+
+Semua koleksi berada di **root level** (bukan nested/subcollection) supaya query lintas data (misalnya cari semua `user_skills` dengan `type: teach`) tetap mudah dengan Firestore query + index.
+
+### 6.2 Index yang Dibutuhkan
+
+Karena matching butuh filter kombinasi (`skill_id` + `type`), buat composite index:
+
+```text
+Collection: user_skills
+Fields: skill_id (Ascending), type (Ascending)
+
+Collection: requests
+Fields: receiver_id (Ascending), status (Ascending), created_at (Descending)
+
+Collection: sessions
+Fields: teacher_id / learner_id (Ascending), status (Ascending), date (Ascending)
+```
+
+### 6.3 Firestore Security Rules (Outline)
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /user_skills/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.user_id == request.auth.uid;
+    }
+
+    match /requests/{docId} {
+      allow read: if request.auth != null
+                    && (resource.data.sender_id == request.auth.uid
+                        || resource.data.receiver_id == request.auth.uid);
+      allow create: if request.auth != null
+                    && request.resource.data.sender_id == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.receiver_id == request.auth.uid;
+    }
+
+    match /messages/{docId} {
+      allow read, write: if request.auth != null
+                    && (resource.data.sender_id == request.auth.uid
+                        || resource.data.receiver_id == request.auth.uid);
+    }
+
+    match /sessions/{docId} {
+      allow read, write: if request.auth != null
+                    && (resource.data.teacher_id == request.auth.uid
+                        || resource.data.learner_id == request.auth.uid);
+    }
+
+    match /reviews/{docId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.reviewer_id == request.auth.uid;
+    }
+  }
+}
+```
+
+> Ini masih outline — perlu disesuaikan lagi saat implementasi (misalnya validasi tipe data, panjang string, dsb).
+
+### 6.4 Firebase Storage
+
+```text
+/profile_pictures/{userId}.jpg
+```
+
+Rules dasar: hanya pemilik akun yang boleh upload/replace foto miliknya sendiri, semua user login boleh membaca.
+
+---
+
+## 7. Implementasi Algoritma Matching
+
+Mengacu ke formula di README (bagian 10), berikut breakdown implementasi di `matching_service.dart`:
+
+```text
+Match Score =
+  (Skill Match     × 0.50)
++ (Reverse Match    × 0.20)
++ (Schedule Match   × 0.15)
++ (Mode Match       × 0.10)
++ (Rating           × 0.05)
+```
+
+Penjelasan tiap komponen:
+
+| Komponen | Cara Hitung (sederhana) |
+|---|---|
+| **Skill Match** | Apakah skill yang ingin dipelajari user A ada di daftar "Can Teach" user B → 100 jika cocok, 0 jika tidak |
+| **Reverse Match** | Apakah skill yang ingin dipelajari user B ada di daftar "Can Teach" user A |
+| **Schedule Match** | Persentase overlap availability (misal jumlah slot waktu yang sama / total slot) |
+| **Mode Match** | Sama-sama online, sama-sama offline, atau sama-sama fleksibel → 100; beda mode → 0 atau 50 |
+| **Rating** | Rating rata-rata user B dinormalisasi ke skala 0–100 (misal `rating/5 * 100`) |
+
+Hasil akhir dibulatkan dan ditampilkan sebagai persentase (`🎯 96% Match`), lalu daftar kandidat diurutkan (sort descending) berdasarkan skor ini sebelum ditampilkan di layar Discover.
+
+---
+
+## 8. Navigasi & Routing
+
+Menggunakan named routes terpusat di `routes/app_routes.dart`, contoh struktur:
+
+```text
+/splash
+/login
+/register
+/onboarding/complete-profile
+/onboarding/select-skills
+/onboarding/availability
+/home
+/discover
+/discover/profile/:userId
+/request/send/:userId
+/request/inbox
+/chat/:conversationId
+/session/schedule/:requestId
+/session/detail/:sessionId
+/rating/:sessionId
+```
+
+Auth guard sederhana: sebelum masuk ke `/home` dan seterusnya, cek `authStateChanges` dari `auth_service` — kalau belum login, redirect ke `/login`.
+
+---
+
+## 9. State: Loading / Empty / Error
+
+Setiap Provider yang mengambil data dari Firestore disarankan punya 3 state standar, supaya UI konsisten di semua screen:
+
+```dart
+enum ViewState { idle, loading, loaded, empty, error }
+```
+
+Contoh pemakaian di UI:
+
+```text
+if (provider.state == ViewState.loading) → LoadingState widget
+if (provider.state == ViewState.empty)   → EmptyState widget ("Belum ada match nih 🔍")
+if (provider.state == ViewState.error)   → error message + tombol retry
+if (provider.state == ViewState.loaded)  → render data
+```
+
+Ini selaras dengan bagian **UI/UX Guidelines** di README yang sudah menyebutkan *empty states*, *loading states*, dan *error states* sebagai komponen wajib.
+
+---
+
+## 10. Ringkasan Tech Stack
+
+| Layer | Teknologi |
+|---|---|
+| Frontend | Flutter (Dart), Material Design |
+| State Management | Provider |
+| Backend / Auth | Firebase Authentication |
+| Database | Cloud Firestore |
+| File Storage | Firebase Storage |
+| Notifikasi (future) | Firebase Cloud Messaging |
+| Version Control | Git + GitHub |
+
+---
+
+## 11. Batasan Arsitektur (Sesuai Scope MVP)
+
+Selaras dengan bagian "Fitur yang Tidak Dikerjakan" di README, arsitektur ini **sengaja tidak menyediakan**:
+
+* Layer untuk AI/ML recommendation.
+* Repository/interface abstraction berlapis (tidak pakai dependency injection framework seperti `get_it` + repository pattern penuh) — cukup service layer langsung, supaya lebih cepat dikerjakan dalam 12 pertemuan.
+* Caching offline kompleks (misalnya Hive/SQLite lokal) — untuk MVP, Firestore cache bawaan sudah cukup.
+* Real-time video call SDK (Agora/Jitsi dsb) — cukup field `meeting_link` di session yang diisi manual (link Zoom/Google Meet).
+
+Bagian-bagian ini bisa ditambahkan di iterasi berikutnya tanpa mengubah struktur layer utama, karena service layer sudah memisahkan logic dari UI.
+
+---
+
+## 12. Data Contract per Service
+
+Karena SkillSwap tidak punya REST API (langsung ke Firestore), "contract"-nya adalah **shape data** yang masuk/keluar dari tiap method service. Ini penting supaya frontend (Provider) dan backend logic (Service) tidak salah asumsi field.
+
+### 12.1 `matching_service.dart`
+
+```text
+Input  getRankedMatches(currentUser, candidates):
+  currentUser: UserModel { id, teachSkills[], learnSkills[], availability[], mode, rating }
+  candidates:  List<UserModel>
+
+Output:
+  List<MatchResult> {
+    user: UserModel
+    score: double        // 0–100
+    skillMatch: double
+    reverseMatch: double
+    scheduleMatch: double
+    modeMatch: double
+  }
+  // sudah terurut descending by score
+```
+
+### 12.2 `firestore_service.dart` — `sendRequest`
+
+```text
+Input  RequestModel {
+  senderId: String
+  receiverId: String
+  teachSkill: String     // skill_id
+  learnSkill: String     // skill_id
+  message: String
+}
+
+Output:
+  Success -> void (UI menampilkan toast "Request terkirim")
+  Failure -> throws AppException(code, message)
+```
+
+### 12.3 `chat_service.dart` — `listenMessages`
+
+```text
+Input  conversationId: String
+
+Output Stream<List<MessageModel>> {
+  id: String
+  senderId: String
+  receiverId: String
+  message: String
+  timestamp: DateTime
+  readStatus: bool
+}
+```
+
+### 12.4 Dashboard Summary (untuk Home Screen, jika ditambahkan nanti)
+
+```text
+Output DashboardSummary {
+  totalActiveRequests: int
+  totalUpcomingSessions: int
+  totalCompletedSessions: int
+  averageRating: double
+}
+```
+
+> Pola ini dipakai konsisten untuk semua service: setiap method punya **input model yang jelas** dan **output model yang jelas** (bukan `Map<String, dynamic>` mentah), supaya gampang di-mock saat testing dan gampang dibaca oleh anggota tim lain.
+
+---
+
+## 13. Deployment & Environment Topology
+
+### 13.1 Firebase Project per Environment
+
+```text
+skillswap-dev      → untuk development & testing sehari-hari
+skillswap-prod      → untuk versi yang dipakai user asli (kalau sudah rilis)
+```
+
+Untuk scope 12 pertemuan / tugas akademik, **`skillswap-dev` saja sudah cukup** — pemisahan dev/prod ini opsional, disiapkan sebagai catatan kalau project dilanjutkan setelah kelas selesai.
+
+### 13.2 Flutter Flavor / Environment Config
+
+```text
+lib/
+└── core/
+    └── config/
+        ├── firebase_options_dev.dart     # hasil `flutterfire configure` project dev
+        └── firebase_options_prod.dart    # hasil `flutterfire configure` project prod
+```
+
+`main.dart` memilih config berdasarkan flavor saat build:
+
+```bash
+flutter run --flavor dev
+flutter build apk --flavor prod
+```
+
+### 13.3 Topologi Runtime
+
+```mermaid
+graph LR
+    A[Flutter App - Android Device] -->|HTTPS| B[Firebase Auth]
+    A -->|HTTPS| C[Cloud Firestore]
+    A -->|HTTPS| D[Firebase Storage]
+    A -->|HTTPS| E[Firebase Cloud Messaging]
+```
+
+Tidak ada server backend custom — semua request dari app langsung ke layanan Firebase (serverless), jadi tidak perlu hosting backend terpisah.
+
+### 13.4 CI/CD (Opsional, untuk pengembangan lanjutan)
+
+```text
+GitHub push -> GitHub Actions
+   1. flutter pub get
+   2. flutter analyze
+   3. flutter test
+   4. flutter build apk --flavor dev
+   5. upload ke Firebase App Distribution (untuk testing tim/dosen)
+```
+
+Untuk kebutuhan tugas kuliah, langkah 1–3 (analyze + test) saja sudah cukup sebagai "quality gate" sebelum submit.
+
+---
+
+## 14. Strategi Error Handling
+
+### 14.1 Custom Exception
+
+Semua service melempar exception yang seragam, supaya Provider bisa menampilkan pesan yang konsisten ke UI:
+
+```dart
+class AppException implements Exception {
+  final String code;
+  final String message; // sudah dalam Bahasa Indonesia, siap ditampilkan ke user
+  AppException(this.code, this.message);
+}
+```
+
+### 14.2 Mapping Error Firebase → Pesan Indonesia
+
+| Firebase Error Code | Pesan ke User |
+|---|---|
+| `user-not-found` / `wrong-password` | "Email atau kata sandi salah." |
+| `email-already-in-use` | "Email sudah terdaftar, silakan login." |
+| `network-request-failed` | "Koneksi internet bermasalah, coba lagi." |
+| `permission-denied` | "Kamu tidak punya akses untuk aksi ini." |
+| `unavailable` (Firestore) | "Server sedang sibuk, silakan coba beberapa saat lagi." |
+
+### 14.3 Pola Try-Catch di Service
+
+```dart
+Future<UserModel> login(String email, String password) async {
+  try {
+    final credential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    return await _getUserModel(credential.user!.uid);
+  } on FirebaseAuthException catch (e) {
+    throw AppException(e.code, _mapAuthError(e.code));
+  } catch (e) {
+    throw AppException('unknown', 'Terjadi kesalahan, silakan coba lagi.');
+  }
+}
+```
+
+Provider tinggal `try { ... } catch (AppException e) { state = ViewState.error; errorMessage = e.message; }` — tidak perlu tahu detail Firebase sama sekali.
+
+---
+
+## 15. Reliability & Offline Handling
+
+* **Firestore offline persistence** diaktifkan secara default di Flutter — data yang pernah dibaca tetap bisa diakses walau koneksi terputus sementara, dan write akan otomatis di-sync ulang saat online kembali.
+* **Retry sederhana**: untuk aksi penting (kirim request, kirim pesan), tampilkan tombol "Coba Lagi" di UI saat gagal, daripada membangun mekanisme retry otomatis yang kompleks — cukup untuk scope MVP.
+* **Firestore quota**: karena tier gratis (Spark Plan) punya batas read/write harian, hindari query berulang tanpa perlu (misalnya jangan `get()` ulang di setiap rebuild widget — simpan di Provider state).
+* **Race condition sederhana**: saat dua pihak menerima request bersamaan (jarang terjadi di skala kecil), cukup andalkan `status` field di dokumen request sebagai penentu — request yang statusnya sudah berubah dari `pending` akan ditolak otomatis oleh security rules.
+
+---
+
+### Referensi
+
+Dokumen ini melengkapi `README.md` — untuk detail fitur, database schema per koleksi, dan use case, lihat kembali README bagian 4, 10, 12, dan 16.
