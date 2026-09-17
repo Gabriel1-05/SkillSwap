@@ -47,17 +47,15 @@ Dokumen ini menjelaskan arsitektur teknis aplikasi **SkillSwap**, lanjutan dari 
 
 ### Diagram (Mermaid)
 
-```mermaid
-graph TD
-    A[Screens & Widgets] --> B[Providers - State Management]
-    B --> C[Services Layer]
-    C --> D[(Firebase Auth)]
-    C --> E[(Cloud Firestore)]
-    C --> F[(Firebase Storage)]
-    C --> G[(Firebase Cloud Messaging)]
-```
-
----
+    ```mermaid
+    graph TD
+        A[Screens & Widgets] --> B[Providers - State Management]
+        B --> C[Services Layer]
+        C --> D[(Firebase Auth)]
+        C --> E[(Cloud Firestore)]
+        C --> F[(Firebase Storage)]
+        C --> G[(Firebase Cloud Messaging)]
+    ```
 
 ## 3. Struktur Folder (Detail)
 
