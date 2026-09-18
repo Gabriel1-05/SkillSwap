@@ -4,6 +4,24 @@ Dokumen ini menjelaskan arsitektur teknis aplikasi **SkillSwap**, lanjutan dari 
 
 > Catatan: Arsitektur ini sengaja dibuat **sederhana** (bukan full Clean Architecture dengan banyak abstraction layer) agar realistis dikerjakan dalam 12 pertemuan, sambil tetap terstruktur dan mudah dikembangkan.
 
+## Daftar Isi
+
+1. [Prinsip Arsitektur](#1-prinsip-arsitektur)
+2. [Layer Aplikasi](#2-layer-aplikasi)
+3. [Struktur Folder (Detail)](#3-struktur-folder-detail)
+4. [Tanggung Jawab Tiap Service](#4-tanggung-jawab-tiap-service)
+5. [Alur Data (Sequence Diagrams)](#5-alur-data-sequence-diagrams)
+6. [Firebase Architecture](#6-firebase-architecture)
+7. [Implementasi Algoritma Matching](#7-implementasi-algoritma-matching)
+8. [Navigasi & Routing](#8-navigasi--routing)
+9. [State: Loading / Empty / Error](#9-state-loading--empty--error)
+10. [Ringkasan Tech Stack](#10-ringkasan-tech-stack)
+11. [Batasan Arsitektur (Sesuai Scope MVP)](#11-batasan-arsitektur-sesuai-scope-mvp)
+12. [Data Contract per Service](#12-data-contract-per-service)
+13. [Deployment & Environment Topology](#13-deployment--environment-topology)
+14. [Strategi Error Handling](#14-strategi-error-handling)
+15. [Reliability & Offline Handling](#15-reliability--offline-handling)
+
 ---
 
 ## 1. Prinsip Arsitektur
@@ -18,28 +36,28 @@ Dokumen ini menjelaskan arsitektur teknis aplikasi **SkillSwap**, lanjutan dari 
 ## 2. Layer Aplikasi
 
 ```text
-┌─────────────────────────────────────────┐
-│              PRESENTATION                │
-│      screens/  +  widgets/                │
-│   (UI, tidak berisi logic bisnis)         │
-└───────────────────┬───────────────────────┘
-                     │ listen / call
-┌───────────────────▼───────────────────────┐
-│              STATE MANAGEMENT              │
-│                 providers/                 │
-│   (menyimpan state, notify UI saat berubah)│
-└───────────────────┬───────────────────────┘
-                     │ call method
-┌───────────────────▼───────────────────────┐
-│                SERVICE LAYER               │
-│                 services/                  │
-│  auth_service, firestore_service,          │
-│  matching_service, storage_service         │
-└───────────────────┬───────────────────────┘
-                     │ read/write
-┌───────────────────▼───────────────────────┐
-│                 DATA LAYER                 │
-│     Firebase Auth · Firestore · Storage    │
+┌─────────────────────────────────────────────┐
+│                 PRESENTATION                │
+│            screens/  +  widgets/            │
+│       (UI, tidak berisi logic bisnis)       │
+└──────────────────────┬──────────────────────┘
+                       │ listen / call
+┌──────────────────────▼──────────────────────┐
+│               STATE MANAGEMENT              │
+│                  providers/                 │
+│  (menyimpan state, notify UI saat berubah)  │
+└──────────────────────┬──────────────────────┘
+                       │ call method
+┌──────────────────────▼──────────────────────┐
+│                SERVICE LAYER                │
+│                  services/                  │
+│       auth_service, firestore_service,      │
+│      matching_service, storage_service      │
+└──────────────────────┬──────────────────────┘
+                       │ read/write
+┌──────────────────────▼──────────────────────┐
+│                  DATA LAYER                 │
+│     Firebase Auth · Firestore · Storage     │
 └─────────────────────────────────────────────┘
 ```
 
@@ -67,9 +85,9 @@ lib/
 ├── main.dart
 │
 ├── core/
-│   ├── constants/          # warna, string, ukuran, dsb
-│   ├── theme/               # ThemeData Flutter
-│   └── utils/                # helper function (format tanggal, validasi, dll)
+│   ├── constants/  # warna, string, ukuran, dsb
+│   ├── theme/      # ThemeData Flutter
+│   └── utils/      # helper function (format tanggal, validasi, dll)
 │
 ├── models/
 │   ├── user_model.dart
@@ -97,13 +115,13 @@ lib/
 │   └── session_provider.dart
 │
 ├── screens/
-│   ├── auth/                 # login, register
-│   ├── onboarding/           # complete profile, select skill, availability
+│   ├── auth/         # login, register
+│   ├── onboarding/   # complete profile, select skill, availability
 │   ├── home/
-│   ├── discover/              # skill discovery + matching result
-│   ├── request/                # kirim / terima skillswap request
+│   ├── discover/     # skill discovery + matching result
+│   ├── request/      # kirim / terima skillswap request
 │   ├── chat/
-│   ├── session/                # scheduling, detail session
+│   ├── session/      # scheduling, detail session
 │   └── profile/
 │
 ├── widgets/
@@ -551,8 +569,8 @@ Output DashboardSummary {
 ### 13.1 Firebase Project per Environment
 
 ```text
-skillswap-dev      → untuk development & testing sehari-hari
-skillswap-prod      → untuk versi yang dipakai user asli (kalau sudah rilis)
+skillswap-dev    → untuk development & testing sehari-hari
+skillswap-prod   → untuk versi yang dipakai user asli (kalau sudah rilis)
 ```
 
 Untuk scope 12 pertemuan / tugas akademik, **`skillswap-dev` saja sudah cukup** — pemisahan dev/prod ini opsional, disiapkan sebagai catatan kalau project dilanjutkan setelah kelas selesai.
