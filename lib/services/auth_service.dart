@@ -3,11 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../core/errors/app_exception.dart';
 
 class AuthService {
-  AuthService({FirebaseAuth? auth}) : _authFactory = () => auth ?? FirebaseAuth.instance;
+  AuthService({FirebaseAuth? auth}) : _providedAuth = auth;
 
-  final FirebaseAuth Function() _authFactory;
+  final FirebaseAuth? _providedAuth;
 
-  FirebaseAuth get _auth => _authFactory();
+  FirebaseAuth get _auth => _providedAuth ?? FirebaseAuth.instance;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
