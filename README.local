@@ -1,0 +1,78 @@
+# SkillSwap
+
+SkillSwap adalah aplikasi Flutter untuk mempertemukan mahasiswa yang ingin belajar dan berbagi skill.
+
+## Yang sudah tersedia
+
+- Fondasi Flutter dengan Material 3, Provider, dan navigasi lima tab berbahasa Indonesia.
+- Layar login, register, dan reset kata sandi melalui Firebase Authentication.
+- Beranda, profil demo, dan halaman Temukan dengan kartu rekomendasi.
+- `MatchingService` murni: skill, kecocokan dua arah, availability, mode, dan rating.
+- Data demo Gabriel, Andi, Sarah, Kevin, dan Dina untuk mencoba alur rekomendasi.
+- Test unit untuk skor acuan README dan beberapa kasus matching.
+- Aturan Firestore awal yang hanya membuka akses untuk operasi yang sudah dirancang.
+
+Login, register, dan reset kata sandi sudah memiliki service/provider Firebase, tetapi hanya dapat dipakai setelah `flutterfire configure` dan `Firebase.initializeApp` disiapkan. Penyimpanan profil, request, chat, dan sesi belum terhubung ke Firebase. Tombol dan tab yang alurnya belum dibuat belum mengirim atau menyimpan data. Data rekomendasi yang tampak di layar berasal dari `lib/providers/discover_provider.dart`.
+
+## Prasyarat
+
+- Flutter stable dan Dart 3
+- Android Studio dengan Android SDK, atau perangkat Android
+- Node.js dan Firebase CLI untuk deploy rules/index
+- Firebase project untuk Authentication dan Cloud Firestore
+
+## Menyiapkan dan menjalankan
+
+1. Di Windows PowerShell, generate konfigurasi Android di direktori sementara agar source aplikasi di root tidak tertimpa:
+
+   ```powershell
+   flutter create --platforms=android --project-name=skillswap --no-pub "$env:TEMP\skillswap_android"
+   Copy-Item -Recurse "$env:TEMP\skillswap_android\android" .
+   Copy-Item "$env:TEMP\skillswap_android\.metadata" .
+   flutter pub get
+   ```
+
+2. Di Firebase Console, buat project dan aktifkan Authentication (Email/Password) serta Cloud Firestore.
+
+3. Hubungkan project Firebase ke Flutter:
+
+   ```bash
+   dart pub global activate flutterfire_cli
+   flutterfire configure
+   ```
+
+   Pilih Android dan project Firebase yang benar. Jangan tambahkan service account key atau rahasia Firebase ke repository.
+
+4. Deploy rules dan index dari root project:
+
+   ```bash
+   firebase deploy --only firestore:rules,firestore:indexes
+   ```
+
+5. Jalankan pemeriksaan dan aplikasi:
+
+   ```bash
+   flutter analyze
+   flutter test
+   flutter run
+   ```
+
+`firebase_core`, `firebase_auth`, `cloud_firestore`, dan `firebase_storage` sudah tercantum sebagai dependency, tetapi source prototype belum memanggilnya. Firebase rules saat ini sengaja menolak writes untuk messages, sessions, dan reviews sampai service dan rules fitur tersebut selesai serta diuji dengan Firebase Emulator.
+
+## Struktur utama
+
+```text
+lib/
+├── main.dart
+├── models/
+├── providers/
+├── screens/
+└── services/
+test/services/
+firestore.rules
+firestore.indexes.json
+```
+
+## Matching
+
+Bobot matching mengikuti spesifikasi: skill 50%, skill dua arah 20%, jadwal 15%, mode 10%, dan rating 5%. Hanya kandidat dengan kecocokan skill utama yang masuk rekomendasi. Contoh Gabriel–Andi menghasilkan skor 95,75 dan ditampilkan sebagai 96%.

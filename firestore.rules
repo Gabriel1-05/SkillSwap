@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if owner(userId)
+        && request.resource.data.id == userId
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if owner(userId)
+        && !changedKeys().hasAny(['rating', 'rating_sum', 'rating_count', 'total_sessions']);
+      allow delete: if false;
+    }
+
+    match /skills/{skillId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /user_skills/{skillDocId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.type in ['teach', 'learn']
+        && request.resource.data.level in ['beginner', 'intermediate', 'advanced'];
+      allow update: if signedIn()
+        && resource.data.user_id == request.auth.uid
+        && changedKeys().hasOnly(['level'])
+        && request.resource.data.level in ['beginner', 'intermediate', 'advanced'];
+      allow delete: if signedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    match /requests/{requestId} {
+      allow read: if signedIn()
+        && (resource.data.sender_id == request.auth.uid || resource.data.receiver_id == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.sender_id == request.auth.uid
+        && request.resource.data.receiver_id != request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 300;
+      allow update: if signedIn()
+        && changedKeys().hasOnly(['status'])
+        && resource.data.status == 'pending'
+        && ((resource.data.receiver_id == request.auth.uid
+              && request.resource.data.status in ['accepted', 'declined'])
+            || (resource.data.sender_id == request.auth.uid
+              && request.resource.data.status == 'cancelled'));
+      allow delete: if false;
+    }
+
+    match /messages/{messageId} {
+      allow read, write: if false;
+    }
+
+    match /sessions/{sessionId} {
+      allow read, write: if false;
+    }
+
+    match /reviews/{reviewId} {
+      allow read, write: if false;
+    }
+  }
+}
