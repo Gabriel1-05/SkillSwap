@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'providers/booking_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/discover_provider.dart';
+import 'providers/request_provider.dart';
 import 'screens/app_shell.dart';
+import 'services/skill_swap_repository.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
+        Provider<SkillSwapRepository>(
+          create: (_) => InMemorySkillSwapRepository(),
+        ),
         ChangeNotifierProvider(create: (_) => DiscoverProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (context) => RequestProvider(
+            repository: context.read<SkillSwapRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => BookingProvider(
+            repository: context.read<SkillSwapRepository>(),
+          ),
+        ),
       ],
       child: const SkillSwapApp(),
     ),
@@ -28,6 +45,8 @@ class SkillSwapApp extends StatelessWidget {
     return MaterialApp(
       title: 'SkillSwap',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [Locale('id', 'ID'), Locale('en', 'US')],
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF7F7F2),

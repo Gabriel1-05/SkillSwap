@@ -1535,6 +1535,10 @@ Tujuan utama SkillSwap:
 * Session Management.
 * Rating System.
 
+### State Management Assignment
+
+Fitur kirim permintaan SkillSwap dan booking sesi sudah menggunakan Provider, form validation, repository boundary, serta state loading/data/empty/error/retry/submit. Implementasi saat ini memakai in-memory repository dan belum menyimpan data ke Firestore. Test, prompt AI, catatan review mandiri, dan panduan screenshot ada di [`docs/state-management-assignment.md`](docs/state-management-assignment.md).
+
 ---
 
 ## 30. Academic Project

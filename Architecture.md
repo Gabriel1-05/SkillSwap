@@ -4,7 +4,7 @@ Dokumen ini menjelaskan arsitektur teknis aplikasi **SkillSwap**, lanjutan dari 
 
 > Catatan: Arsitektur ini sengaja dibuat **sederhana** (bukan full Clean Architecture dengan banyak abstraction layer) agar realistis dikerjakan dalam 12 pertemuan, sambil tetap terstruktur dan mudah dikembangkan.
 
-> Status implementasi: fondasi Flutter, matching service, provider discover/auth, dan layar demo sudah tersedia. Firebase initialization, onboarding, Firestore service, request, chat, sesi, dan review masih dikerjakan bertahap sesuai urutan MVP.
+> Status implementasi: fondasi Flutter, matching, auth dasar, request SkillSwap, dan booking sesi sudah tersedia. Request dan booking saat ini memakai repository in-memory untuk demonstrasi state; data tidak persisten dan belum terhubung ke Firestore. Chat, onboarding lengkap, dan review masih dikerjakan bertahap.
 
 ## Daftar Isi
 

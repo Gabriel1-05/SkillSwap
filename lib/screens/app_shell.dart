@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../models/match_result.dart';
 import '../models/view_state.dart';
 import 'auth_screen.dart';
+import 'booking_screen.dart';
+import 'request_screen.dart';
 import '../providers/discover_provider.dart';
 
 class AppShell extends StatefulWidget {
@@ -36,11 +38,7 @@ class _AppShellState extends State<AppShell> {
         title: 'Percakapanmu',
         subtitle: 'Chat akan tersedia setelah permintaan SkillSwap diterima.',
       ),
-      const _ComingSoonPage(
-        icon: Icons.calendar_month_outlined,
-        title: 'Ruang belajarmu',
-        subtitle: 'Jadwalkan sesi belajar bersama teman yang cocok.',
-      ),
+      const BookingScreen(),
       const _ProfilePage(),
     ];
 
@@ -156,7 +154,15 @@ class _HomePage extends StatelessWidget {
               ?._goToDiscover(),
         ),
         const SizedBox(height: 12),
-        if (featured != null) _MatchCard(match: featured),
+        if (featured != null)
+          _MatchCard(
+            match: featured,
+            onRequest: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const RequestScreen(),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -208,7 +214,14 @@ class _DiscoverPage extends StatelessWidget {
         else
           ...provider.matches.map((match) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _MatchCard(match: match),
+                child: _MatchCard(
+                  match: match,
+                  onRequest: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const RequestScreen(),
+                    ),
+                  ),
+                ),
               )),
       ],
     );
@@ -216,9 +229,10 @@ class _DiscoverPage extends StatelessWidget {
 }
 
 class _MatchCard extends StatelessWidget {
-  const _MatchCard({required this.match});
+  const _MatchCard({required this.match, this.onRequest});
 
   final MatchResult match;
+  final VoidCallback? onRequest;
 
   @override
   Widget build(BuildContext context) {
@@ -319,9 +333,9 @@ class _MatchCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: onRequest,
               icon: const Icon(Icons.person_add_alt_1, size: 17),
-              label: const Text('Lihat profil'),
+              label: const Text('Kirim permintaan'),
               style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF1F6B57),
                   side: const BorderSide(color: Color(0xFF9CB9A8)),
