@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import '../core/errors/app_exception.dart';
 
@@ -7,7 +8,16 @@ class AuthService {
 
   final FirebaseAuth? _providedAuth;
 
-  FirebaseAuth get _auth => _providedAuth ?? FirebaseAuth.instance;
+  FirebaseAuth get _auth {
+    if (_providedAuth != null) return _providedAuth;
+    if (Firebase.apps.isEmpty) {
+      throw const AppException(
+        'firebase-not-configured',
+        'Firebase belum dikonfigurasi. Login dan reset kata sandi belum tersedia.',
+      );
+    }
+    return FirebaseAuth.instance;
+  }
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -19,6 +29,8 @@ class AuthService {
       );
     } on FirebaseAuthException catch (error) {
       throw AppException(error.code, _mapError(error.code));
+    } on AppException {
+      rethrow;
     } catch (_) {
       throw const AppException('unknown', 'Terjadi kesalahan, silakan coba lagi.');
     }
@@ -32,6 +44,8 @@ class AuthService {
       );
     } on FirebaseAuthException catch (error) {
       throw AppException(error.code, _mapError(error.code));
+    } on AppException {
+      rethrow;
     } catch (_) {
       throw const AppException('unknown', 'Terjadi kesalahan, silakan coba lagi.');
     }

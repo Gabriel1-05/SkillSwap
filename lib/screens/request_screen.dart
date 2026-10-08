@@ -38,37 +38,41 @@ class _RequestScreenState extends State<RequestScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<RequestProvider>();
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(22, 26, 22, 34),
-      children: [
-        const Text(
-          'Kirim permintaan',
-          style: TextStyle(
-            color: Color(0xFF193A36),
-            fontSize: 27,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text('Mulai pertukaran skill dengan teman yang cocok.'),
-        const SizedBox(height: 22),
-        if (provider.state == ViewState.loading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(36),
-              child: CircularProgressIndicator(),
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(22, 26, 22, 34),
+          children: [
+            const Text(
+              'Kirim permintaan',
+              style: TextStyle(
+                color: Color(0xFF193A36),
+                fontSize: 27,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          )
-        else if (provider.state == ViewState.error)
-          _RequestErrorState(
-            message: provider.errorMessage ?? 'Data gagal dimuat.',
-            onRetry: provider.loadCandidates,
-          )
-        else if (provider.state == ViewState.empty)
-          const _RequestEmptyState()
-        else
-          _buildForm(context, provider),
-      ],
+            const SizedBox(height: 8),
+            const Text('Mulai pertukaran skill dengan teman yang cocok.'),
+            const SizedBox(height: 22),
+            if (provider.state == ViewState.loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(36),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (provider.state == ViewState.error)
+              _RequestErrorState(
+                message: provider.errorMessage ?? 'Data gagal dimuat.',
+                onRetry: provider.loadCandidates,
+              )
+            else if (provider.state == ViewState.empty)
+              const _RequestEmptyState()
+            else
+              _buildForm(context, provider),
+          ],
+        ),
+      ),
     );
   }
 
