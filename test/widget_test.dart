@@ -12,6 +12,7 @@ import 'package:skillswap/main.dart';
 import 'package:skillswap/providers/auth_provider.dart';
 import 'package:skillswap/providers/booking_provider.dart';
 import 'package:skillswap/providers/discover_provider.dart';
+import 'package:skillswap/providers/local_data_provider.dart';
 import 'package:skillswap/providers/request_provider.dart';
 import 'package:skillswap/services/skill_swap_repository.dart';
 
@@ -29,6 +30,9 @@ void main() {
           ),
           ChangeNotifierProvider(
             create: (_) => BookingProvider(repository: repository),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => LocalDataProvider(repository: repository),
           ),
         ],
         child: const SkillSwapApp(),

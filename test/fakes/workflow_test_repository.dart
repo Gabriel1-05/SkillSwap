@@ -32,6 +32,20 @@ class WorkflowTestRepository implements SkillSwapRepository {
   final bookings = <SessionBookingDraft>[];
 
   @override
+  Future<List<SkillSwapRequestDraft>> getCreatedRequests() async =>
+      List.unmodifiable(requests);
+
+  @override
+  Future<void> updateRequest(int index, SkillSwapRequestDraft request) async {
+    requests[index] = request;
+  }
+
+  @override
+  Future<void> deleteRequest(int index) async {
+    requests.removeAt(index);
+  }
+
+  @override
   Future<List<RequestCandidate>> getRequestCandidates() async {
     if (candidateLoadGate != null) return candidateLoadGate!.future;
     if (candidateLoadFailures > 0) {
@@ -61,5 +75,25 @@ class WorkflowTestRepository implements SkillSwapRepository {
   Future<void> createBooking(SessionBookingDraft booking) async {
     if (bookingSubmitGate != null) await bookingSubmitGate!.future;
     bookings.add(booking);
+  }
+
+  @override
+  Future<List<SessionBookingDraft>> getCreatedBookings() async =>
+      List.unmodifiable(bookings);
+
+  @override
+  Future<void> updateBooking(int index, SessionBookingDraft booking) async {
+    bookings[index] = booking;
+  }
+
+  @override
+  Future<void> deleteBooking(int index) async {
+    bookings.removeAt(index);
+  }
+
+  @override
+  Future<void> clearAllData() async {
+    requests.clear();
+    bookings.clear();
   }
 }

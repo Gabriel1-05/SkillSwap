@@ -1,31 +1,64 @@
+/// ============================================================
+/// MAIN.DART — Entry Point Aplikasi SkillSwap
+/// ============================================================
+/// Perubahan untuk Local Data & Persistence:
+///   - Inisialisasi SharedPreferences sebelum runApp
+///   - Mengganti InMemorySkillSwapRepository dengan
+///     LocalSkillSwapRepository agar data di-persist ke
+///     shared_preferences
+///   - Menambahkan LocalDataProvider ke MultiProvider
+/// ============================================================
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/booking_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/discover_provider.dart';
+import 'providers/local_data_provider.dart';
 import 'providers/request_provider.dart';
 import 'screens/app_shell.dart';
-import 'services/skill_swap_repository.dart';
+import 'services/local_skill_swap_repository.dart';
+import 'services/local_storage_service.dart';
 
-void main() {
+/// Entry point: menunggu SharedPreferences siap, lalu baru runApp.
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
+
+  // Inisialisasi shared_preferences — local storage
+  final prefs = await SharedPreferences.getInstance();
+  final storage = LocalStorageService(prefs);
+  final repository = LocalSkillSwapRepository(storage);
+  await repository.initialize();
+
   runApp(
     MultiProvider(
       providers: [
-        Provider<SkillSwapRepository>(
-          create: (_) => InMemorySkillSwapRepository(),
+        // Repository yang sekarang pakai local storage
+        Provider<LocalSkillSwapRepository>(
+          create: (_) => repository,
         ),
         ChangeNotifierProvider(create: (_) => DiscoverProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(
           create: (context) => RequestProvider(
-            repository: context.read<SkillSwapRepository>(),
+            repository: context.read<LocalSkillSwapRepository>(),
           ),
         ),
         ChangeNotifierProvider(
           create: (context) => BookingProvider(
-            repository: context.read<SkillSwapRepository>(),
+            repository: context.read<LocalSkillSwapRepository>(),
+          ),
+        ),
+        // Provider baru untuk mengelola data lokal (CRUD)
+        ChangeNotifierProvider(
+          create: (context) => LocalDataProvider(
+            repository: context.read<LocalSkillSwapRepository>(),
           ),
         ),
       ],

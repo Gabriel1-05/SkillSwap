@@ -5,8 +5,10 @@ import '../models/match_result.dart';
 import '../models/view_state.dart';
 import 'auth_screen.dart';
 import 'booking_screen.dart';
+import 'local_data_screen.dart';
 import 'request_screen.dart';
 import '../providers/discover_provider.dart';
+import '../providers/local_data_provider.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -23,7 +25,8 @@ class _AppShellState extends State<AppShell> {
   static const _destinations = [
     NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Beranda'),
     NavigationDestination(icon: Icon(Icons.travel_explore), label: 'Temukan'),
-    NavigationDestination(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
+    NavigationDestination(
+        icon: Icon(Icons.storage_outlined), label: 'Data Lokal'),
     NavigationDestination(icon: Icon(Icons.event_outlined), label: 'Sesi'),
     NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profil'),
   ];
@@ -33,11 +36,7 @@ class _AppShellState extends State<AppShell> {
     final pages = [
       const _HomePage(),
       const _DiscoverPage(),
-      const _ComingSoonPage(
-        icon: Icons.forum_outlined,
-        title: 'Percakapanmu',
-        subtitle: 'Chat akan tersedia setelah permintaan SkillSwap diterima.',
-      ),
+      const LocalDataScreen(),
       const BookingScreen(),
       const _ProfilePage(),
     ];
@@ -50,8 +49,10 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         destinations: _destinations,
-        onDestinationSelected: (index) =>
-            setState(() => _selectedIndex = index),
+        onDestinationSelected: (index) {
+          setState(() => _selectedIndex = index);
+          if (index == 2) context.read<LocalDataProvider>().loadAll();
+        },
         backgroundColor: const Color(0xFFFCFCF8),
         indicatorColor: const Color(0xFFDDEBE3),
       ),

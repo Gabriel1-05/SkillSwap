@@ -3,8 +3,15 @@ import '../models/workflow_models.dart';
 abstract interface class SkillSwapRepository {
   Future<List<RequestCandidate>> getRequestCandidates();
   Future<void> createRequest(SkillSwapRequestDraft request);
+  Future<List<SkillSwapRequestDraft>> getCreatedRequests();
+  Future<void> updateRequest(int index, SkillSwapRequestDraft request);
+  Future<void> deleteRequest(int index);
   Future<List<AcceptedSkillSwap>> getAcceptedSkillSwaps();
   Future<void> createBooking(SessionBookingDraft booking);
+  Future<List<SessionBookingDraft>> getCreatedBookings();
+  Future<void> updateBooking(int index, SessionBookingDraft booking);
+  Future<void> deleteBooking(int index);
+  Future<void> clearAllData();
 }
 
 class InMemorySkillSwapRepository implements SkillSwapRepository {
@@ -18,6 +25,14 @@ class InMemorySkillSwapRepository implements SkillSwapRepository {
   final List<AcceptedSkillSwap> _acceptedSkillSwaps;
   final List<SkillSwapRequestDraft> createdRequests = [];
   final List<SessionBookingDraft> createdBookings = [];
+
+  @override
+  Future<List<SkillSwapRequestDraft>> getCreatedRequests() async =>
+      List.unmodifiable(createdRequests);
+
+  @override
+  Future<List<SessionBookingDraft>> getCreatedBookings() async =>
+      List.unmodifiable(createdBookings);
 
   static const _defaultCandidates = [
     RequestCandidate(
@@ -61,6 +76,16 @@ class InMemorySkillSwapRepository implements SkillSwapRepository {
   }
 
   @override
+  Future<void> updateRequest(int index, SkillSwapRequestDraft request) async {
+    createdRequests[index] = request;
+  }
+
+  @override
+  Future<void> deleteRequest(int index) async {
+    createdRequests.removeAt(index);
+  }
+
+  @override
   Future<List<AcceptedSkillSwap>> getAcceptedSkillSwaps() async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
     return List.unmodifiable(_acceptedSkillSwaps);
@@ -69,13 +94,37 @@ class InMemorySkillSwapRepository implements SkillSwapRepository {
   @override
   Future<void> createBooking(SessionBookingDraft booking) async {
     await Future<void>.delayed(const Duration(milliseconds: 350));
+    _validateBooking(booking);
+    createdBookings.add(booking);
+  }
+
+  void _validateBooking(SessionBookingDraft booking) {
     if (!booking.endTime.isAfter(booking.startTime)) {
       throw const FormatException('Waktu selesai harus setelah waktu mulai.');
     }
+    final uri = Uri.tryParse(booking.meetingLink);
     if (booking.mode == 'online' &&
-        Uri.tryParse(booking.meetingLink)?.hasAbsolutePath != true) {
+        (uri == null ||
+            !uri.hasAuthority ||
+            !['http', 'https'].contains(uri.scheme))) {
       throw const FormatException('Tautan meeting tidak valid.');
     }
-    createdBookings.add(booking);
+  }
+
+  @override
+  Future<void> updateBooking(int index, SessionBookingDraft booking) async {
+    _validateBooking(booking);
+    createdBookings[index] = booking;
+  }
+
+  @override
+  Future<void> deleteBooking(int index) async {
+    createdBookings.removeAt(index);
+  }
+
+  @override
+  Future<void> clearAllData() async {
+    createdRequests.clear();
+    createdBookings.clear();
   }
 }
