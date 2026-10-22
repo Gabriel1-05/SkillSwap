@@ -8,6 +8,13 @@ class AuthService {
 
   final FirebaseAuth? _providedAuth;
 
+  bool get isConfigured => _providedAuth != null || Firebase.apps.isNotEmpty;
+
+  User? get currentUser => isConfigured ? _auth.currentUser : null;
+
+  Stream<User?>? get authStateChanges =>
+      isConfigured ? _auth.authStateChanges() : null;
+
   FirebaseAuth get _auth {
     if (_providedAuth != null) return _providedAuth;
     if (Firebase.apps.isEmpty) {
@@ -18,8 +25,6 @@ class AuthService {
     }
     return FirebaseAuth.instance;
   }
-
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   Future<UserCredential> register(String email, String password) async {
     try {

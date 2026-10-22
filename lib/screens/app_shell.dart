@@ -7,7 +7,9 @@ import 'auth_screen.dart';
 import 'booking_screen.dart';
 import 'local_data_screen.dart';
 import 'request_screen.dart';
+import 'sent_requests_screen.dart';
 import '../providers/discover_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/local_data_provider.dart';
 
 class AppShell extends StatefulWidget {
@@ -187,6 +189,16 @@ class _DiscoverPage extends StatelessWidget {
         const SizedBox(height: 8),
         const Text('Rekomendasi berdasarkan skill dan waktu luangmu.'),
         const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const SentRequestsScreen(),
+            ),
+          ),
+          icon: const Icon(Icons.outbox_outlined),
+          label: const Text('Lihat request terkirim dari backend'),
+        ),
+        const SizedBox(height: 18),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -356,6 +368,7 @@ class _ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<DiscoverProvider>().currentUser;
+    final auth = context.watch<AuthProvider>();
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 30, 22, 32),
       children: [
@@ -412,13 +425,23 @@ class _ProfilePage extends StatelessWidget {
             title: Text('Mode belajar'),
             subtitle: Text('Online')),
         const SizedBox(height: 18),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const AuthScreen()),
+        if (auth.user == null)
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AuthScreen()),
+            ),
+            icon: const Icon(Icons.login),
+            label: const Text('Masuk atau daftar dengan Firebase'),
+          )
+        else ...[
+          Center(child: Text('Firebase: ${auth.user!.email ?? auth.user!.uid}')),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: auth.state == ViewState.loading ? null : auth.logout,
+            icon: const Icon(Icons.logout),
+            label: const Text('Keluar dari Firebase'),
           ),
-          icon: const Icon(Icons.login),
-          label: const Text('Masuk atau daftar dengan Firebase'),
-        ),
+        ],
       ],
     );
   }

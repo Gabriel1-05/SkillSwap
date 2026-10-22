@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/view_state.dart';
 import '../models/workflow_models.dart';
+import '../providers/auth_provider.dart';
 import '../providers/discover_provider.dart';
 import '../providers/request_provider.dart';
 
@@ -212,6 +213,9 @@ class _RequestScreenState extends State<RequestScreen> {
     final candidateId = _candidateId;
     final learnSkill = _learnSkill;
     if (candidateId == null || learnSkill == null) return;
+    final senderId = provider.requiresAuthentication
+        ? context.read<AuthProvider>().user?.uid
+        : null;
     await provider.submitRequest(
       SkillSwapRequestDraft(
         receiverId: candidateId,
@@ -219,6 +223,7 @@ class _RequestScreenState extends State<RequestScreen> {
         learnSkill: learnSkill,
         message: _messageController.text.trim(),
       ),
+      senderId: senderId,
     );
   }
 }

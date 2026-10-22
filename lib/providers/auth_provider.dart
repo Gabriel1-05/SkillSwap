@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
@@ -10,9 +12,28 @@ class AuthProvider extends ChangeNotifier {
       : _authService = authService ?? AuthService();
 
   final AuthService _authService;
+  StreamSubscription<User?>? _authSubscription;
   User? user;
   ViewState state = ViewState.idle;
   String? errorMessage;
+
+  void initialize() {
+    if (_authSubscription != null) return;
+    final changes = _authService.authStateChanges;
+    if (changes == null) return;
+    user = _authService.currentUser;
+    _authSubscription = changes.listen(
+      (value) {
+        user = value;
+        notifyListeners();
+      },
+      onError: (Object error) {
+        state = ViewState.error;
+        errorMessage = 'Status autentikasi gagal dimuat: $error';
+        notifyListeners();
+      },
+    );
+  }
 
   Future<bool> login(String email, String password) => _run(() async {
         final credential = await _authService.login(email, password);
@@ -32,6 +53,12 @@ class AuthProvider extends ChangeNotifier {
     await _authService.logout();
     user = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<bool> _run(Future<void> Function() action) async {

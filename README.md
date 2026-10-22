@@ -1537,7 +1537,24 @@ Tujuan utama SkillSwap:
 
 ### State Management Assignment
 
-Fitur kirim permintaan SkillSwap dan booking sesi sudah menggunakan Provider, form validation, repository boundary, serta state loading/data/empty/error/retry/submit. Implementasi saat ini memakai in-memory repository dan belum menyimpan data ke Firestore. Test, prompt AI, catatan review mandiri, dan panduan screenshot ada di [`docs/state-management-assignment.md`](docs/state-management-assignment.md).
+Fitur kirim permintaan SkillSwap dan booking sesi memakai Provider, repository boundary, validasi form, serta state loading/data/empty/error/retry.
+
+### API Integration & Vertical Slice (P6)
+
+Fitur **Kirim permintaan** menyimpan dan membaca request melalui Firebase Authentication dan Cloud Firestore. Lapisan yang dapat ditunjukkan kepada reviewer:
+
+* Model dan validasi data: `lib/models/skill_swap_request_record.dart`
+* API/repository boundary dan Firestore data source: `lib/services/skill_swap_request_api.dart`
+* Integrasi submit dan state UI: `lib/providers/request_provider.dart` dan `lib/screens/request_screen.dart`
+* Inisialisasi Firebase dan dependency injection: `lib/main.dart`
+* Riwayat request dari backend, termasuk loading, empty, error, dan retry: `lib/providers/sent_request_provider.dart` dan `lib/screens/sent_requests_screen.dart`
+* Unit test model dan API: `test/services/skill_swap_request_api_test.dart`
+
+Test kegagalan memakai `FirebaseException` berkode `unavailable` untuk mensimulasikan backend Firestore/jaringan yang tidak bisa dijangkau. Firestore SDK tidak mengekspos status HTTP di lapisan aplikasi, jadi test ini menguji error backend yang setara tanpa membuat server HTTP terpisah.
+
+**Demo reviewer:** jalankan `flutter run -d chrome`, masuk atau daftar dengan Firebase dari tab **Profil**, lalu buka tab **Temukan** → **Kirim permintaan** dan kirim pesan. Buka **Lihat request terkirim dari backend** untuk membaca dokumen Firestore; muat ulang browser dan buka daftar itu kembali untuk memastikan dokumen tetap tersedia. Authentication Email/Password perlu aktif dan Firestore Rules perlu dipublikasikan pada Firebase project. Jalankan test dengan `flutter test test/services/skill_swap_request_api_test.dart`.
+
+Panduan assignment state management sebelumnya ada di [`docs/state-management-assignment.md`](docs/state-management-assignment.md).
 
 ---
 
