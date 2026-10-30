@@ -164,6 +164,56 @@ class _BookingScreenState extends State<BookingScreen> {
                 ? null
                 : (value) => setState(() => _mode = value ?? 'online'),
           ),
+          if (_mode == 'offline') ...[
+            const SizedBox(height: 12),
+            const Text(
+              'Lokasi bersifat opsional. Jika dipilih, koordinat hanya disimpan di perangkat/browser ini dan tidak dikirim ke Firebase.',
+              style: TextStyle(fontSize: 12, color: Color(0xFF68736E)),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: provider.isCapturingLocation || provider.isSubmitting
+                  ? null
+                  : provider.captureCurrentLocation,
+              icon: provider.isCapturingLocation
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.my_location_outlined),
+              label: Text(
+                provider.isCapturingLocation
+                    ? 'Mengambil lokasi...'
+                    : provider.capturedLocation == null
+                        ? 'Gunakan lokasi saat ini'
+                        : 'Ambil ulang lokasi',
+              ),
+            ),
+            if (provider.locationErrorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  provider.locationErrorMessage!,
+                  style: const TextStyle(color: Color(0xFFB3261E)),
+                ),
+              ),
+            if (provider.capturedLocation case final location?) ...[
+              Text(
+                'Lokasi tersimpan lokal: ${location.latitude.toStringAsFixed(5)}, ${location.longitude.toStringAsFixed(5)} (akurasi ±${location.accuracyMeters.round()} m)',
+                style: const TextStyle(
+                  color: Color(0xFF1F6B57),
+                  fontSize: 12,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: provider.isSubmitting
+                    ? null
+                    : provider.clearCapturedLocation,
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Hapus lokasi'),
+              ),
+            ],
+          ],
           if (_mode == 'online') ...[
             const SizedBox(height: 16),
             TextFormField(
@@ -312,6 +362,13 @@ class _BookingScreenState extends State<BookingScreen> {
         mode: _mode,
         meetingLink:
             _mode == 'online' ? _meetingLinkController.text.trim() : '',
+        latitude:
+            _mode == 'offline' ? provider.capturedLocation?.latitude : null,
+        longitude:
+            _mode == 'offline' ? provider.capturedLocation?.longitude : null,
+        locationAccuracyMeters: _mode == 'offline'
+            ? provider.capturedLocation?.accuracyMeters
+            : null,
       ),
     );
   }

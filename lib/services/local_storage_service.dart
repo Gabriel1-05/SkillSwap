@@ -24,6 +24,22 @@ class LocalStorageService {
 
   bool hasCollection(String key) => _prefs.containsKey(key);
 
+  String? getString(String key) => _prefs.getString(key);
+
+  Future<void> setString(String key, String value) async {
+    final saved = await _prefs.setString(key, value);
+    if (!saved) {
+      throw StateError('Gagal menyimpan data "$key" ke local storage.');
+    }
+  }
+
+  Future<void> remove(String key) async {
+    final removed = await _prefs.remove(key);
+    if (!removed) {
+      throw StateError('Gagal menghapus data "$key" dari local storage.');
+    }
+  }
+
   // ---------------------
   //  CREATE  — tambah item baru ke collection
   // ---------------------

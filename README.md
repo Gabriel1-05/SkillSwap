@@ -1552,9 +1552,31 @@ Fitur **Kirim permintaan** menyimpan dan membaca request melalui Firebase Authen
 
 Test kegagalan memakai `FirebaseException` berkode `unavailable` untuk mensimulasikan backend Firestore/jaringan yang tidak bisa dijangkau. Firestore SDK tidak mengekspos status HTTP di lapisan aplikasi, jadi test ini menguji error backend yang setara tanpa membuat server HTTP terpisah.
 
-**Demo reviewer:** jalankan `flutter run -d chrome`, masuk atau daftar dengan Firebase dari tab **Profil**, lalu buka tab **Temukan** → **Kirim permintaan** dan kirim pesan. Buka **Lihat request terkirim dari backend** untuk membaca dokumen Firestore; muat ulang browser dan buka daftar itu kembali untuk memastikan dokumen tetap tersedia. Authentication Email/Password perlu aktif dan Firestore Rules perlu dipublikasikan pada Firebase project. Jalankan test dengan `flutter test test/services/skill_swap_request_api_test.dart`.
+Firebase client settings disimpan secara lokal di `firebase.local.json` (diabaikan Git). Untuk setup komputer baru, salin `firebase.local.json.example` menjadi `firebase.local.json`, isi nilai dari Firebase Console, lalu jalankan `flutter run -d chrome --dart-define-from-file=firebase.local.json`. File ini mencegah konfigurasi masuk ke Git; nilai client Firebase tetap dapat dilihat di aplikasi web, jadi batasi API key dengan HTTP referrer dan API restrictions di Google Cloud Console. Jangan pernah menyimpan service-account key di aplikasi client.
+
+**Demo reviewer:** jalankan perintah di atas, masuk atau daftar dengan Firebase dari tab **Profil**, lalu buka tab **Temukan** → **Kirim permintaan** dan kirim pesan. Buka **Lihat request terkirim dari backend** untuk membaca dokumen Firestore; muat ulang browser dan buka daftar itu kembali untuk memastikan dokumen tetap tersedia. Authentication Email/Password perlu aktif dan Firestore Rules perlu dipublikasikan pada Firebase project. Jalankan test dengan `flutter test test/services/skill_swap_request_api_test.dart`.
 
 Panduan assignment state management sebelumnya ada di [`docs/state-management-assignment.md`](docs/state-management-assignment.md).
+
+### MVP Lengkap (P7)
+
+Alur demo MVP: **Beranda → Temukan → kirim request → lihat request Firestore → Sesi → jadwalkan sesi → Data Lokal untuk membaca/mengedit/menghapus booking → Profil**. Form memiliki validasi, feedback submit, retry saat pemuatan gagal, dan state kosong.
+
+Tiga advanced feature dan manfaatnya:
+
+1. **Firebase Authentication** melindungi pengiriman serta pembacaan request berdasarkan akun pengguna.
+2. **Kamera** mengambil foto profil agar pengguna dapat mengenali profilnya; foto dibatasi ukurannya dan hanya disimpan lokal, tidak diunggah ke Firebase Storage.
+3. **Lokasi** mengisi koordinat opsional untuk sesi tatap muka. Lokasi hanya diminta setelah tombol dipilih, disimpan pada booking lokal, dan tidak dikirim ke Firebase.
+
+Izin kamera/lokasi diminta hanya saat fitur dipakai. Membatalkan pemilih kamera membiarkan foto tidak berubah; izin lokasi ditolak, layanan lokasi mati, atau timeout menampilkan pesan dan pengguna tetap bisa menjadwalkan sesi tanpa lokasi. Android hanya meminta izin lokasi foreground (`COARSE`/`FINE`), tidak meminta background location. Data kamera/lokasi memakai penyimpanan lokal biasa, bukan penyimpanan terenkripsi; jangan gunakan untuk foto atau koordinat sensitif pada perangkat/browser bersama.
+
+Pengujian fitur lanjutan: `flutter test test/providers/advanced_features_test.dart`. Jalankan aplikasi web memakai konfigurasi lokal Firebase:
+
+```powershell
+flutter run -d chrome --dart-define-from-file=firebase.local.json
+```
+
+Di browser, kamera dan geolokasi memerlukan izin pengguna; `localhost` adalah secure context untuk pengembangan. Koordinat bersifat sensitif, jadi jangan menyertakannya dalam screenshot publik.
 
 ---
 

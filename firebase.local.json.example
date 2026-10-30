@@ -1,0 +1,9 @@
+{
+  "FIREBASE_API_KEY": "replace-with-your-firebase-web-api-key",
+  "FIREBASE_APP_ID": "replace-with-your-firebase-web-app-id",
+  "FIREBASE_MESSAGING_SENDER_ID": "replace-with-your-firebase-messaging-sender-id",
+  "FIREBASE_PROJECT_ID": "replace-with-your-firebase-project-id",
+  "FIREBASE_AUTH_DOMAIN": "replace-with-your-firebase-project-id.firebaseapp.com",
+  "FIREBASE_STORAGE_BUCKET": "replace-with-your-firebase-storage-bucket",
+  "FIREBASE_MEASUREMENT_ID": "replace-with-your-measurement-id"
+}

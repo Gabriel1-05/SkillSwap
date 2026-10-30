@@ -109,6 +109,24 @@ class InMemorySkillSwapRepository implements SkillSwapRepository {
             !['http', 'https'].contains(uri.scheme))) {
       throw const FormatException('Tautan meeting tidak valid.');
     }
+    final hasLatitude = booking.latitude != null;
+    final hasLongitude = booking.longitude != null;
+    if (hasLatitude != hasLongitude ||
+        (hasLatitude &&
+            (booking.mode != 'offline' ||
+                !booking.latitude!.isFinite ||
+                booking.latitude! < -90 ||
+                booking.latitude! > 90 ||
+                !booking.longitude!.isFinite ||
+                booking.longitude! < -180 ||
+                booking.longitude! > 180))) {
+      throw const FormatException('Lokasi tatap muka tidak valid.');
+    }
+    final accuracy = booking.locationAccuracyMeters;
+    if (accuracy != null &&
+        (!hasLatitude || !accuracy.isFinite || accuracy < 0)) {
+      throw const FormatException('Akurasi lokasi tidak valid.');
+    }
   }
 
   @override

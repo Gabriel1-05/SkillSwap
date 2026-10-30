@@ -23,11 +23,13 @@ import 'providers/booking_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/discover_provider.dart';
 import 'providers/local_data_provider.dart';
+import 'providers/profile_photo_provider.dart';
 import 'providers/request_provider.dart';
 import 'providers/sent_request_provider.dart';
 import 'screens/app_shell.dart';
 import 'services/local_skill_swap_repository.dart';
 import 'services/local_storage_service.dart';
+import 'services/profile_photo_service.dart';
 import 'services/skill_swap_request_api.dart';
 
 /// Entry point: menunggu SharedPreferences siap, lalu baru runApp.
@@ -54,7 +56,14 @@ void main() async {
         Provider<LocalSkillSwapRepository>(
           create: (_) => repository,
         ),
+        Provider<LocalStorageService>.value(value: storage),
         ChangeNotifierProvider(create: (_) => DiscoverProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ProfilePhotoProvider(
+            storage: storage,
+            picker: CameraProfilePhotoPicker(),
+          )..load(),
+        ),
         ChangeNotifierProvider(
           create: (_) => AuthProvider()..initialize(),
         ),

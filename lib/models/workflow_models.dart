@@ -106,6 +106,9 @@ class SessionBookingDraft {
     required this.endTime,
     required this.mode,
     required this.meetingLink,
+    this.latitude,
+    this.longitude,
+    this.locationAccuracyMeters,
   });
 
   final String requestId;
@@ -117,6 +120,9 @@ class SessionBookingDraft {
   final DateTime endTime;
   final String mode;
   final String meetingLink;
+  final double? latitude;
+  final double? longitude;
+  final double? locationAccuracyMeters;
 
   /// Serialize ke JSON Map untuk disimpan ke local storage.
   Map<String, dynamic> toJson() => {
@@ -129,6 +135,10 @@ class SessionBookingDraft {
         'endTime': endTime.toIso8601String(),
         'mode': mode,
         'meetingLink': meetingLink,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+        if (locationAccuracyMeters != null)
+          'locationAccuracyMeters': locationAccuracyMeters,
       };
 
   /// Deserialize dari JSON Map yang dibaca dari local storage.
@@ -143,5 +153,9 @@ class SessionBookingDraft {
         endTime: DateTime.parse(json['endTime'] as String),
         mode: json['mode'] as String,
         meetingLink: json['meetingLink'] as String,
+        latitude: (json['latitude'] as num?)?.toDouble(),
+        longitude: (json['longitude'] as num?)?.toDouble(),
+        locationAccuracyMeters:
+            (json['locationAccuracyMeters'] as num?)?.toDouble(),
       );
 }

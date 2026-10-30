@@ -11,9 +11,10 @@ coverage/
 .vscode/
 android/local.properties
 android/key.properties
+android/.kotlin/
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
-# Firebase client configuration for the registered app.
-!lib/firebase_options.dart
+firebase.local.json
+firebase.local.*.json
 tools/seed/node_modules/
 tools/seed/serviceAccountKey.json

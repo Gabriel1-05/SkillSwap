@@ -7,23 +7,35 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:skillswap/main.dart';
 import 'package:skillswap/providers/auth_provider.dart';
 import 'package:skillswap/providers/booking_provider.dart';
 import 'package:skillswap/providers/discover_provider.dart';
 import 'package:skillswap/providers/local_data_provider.dart';
+import 'package:skillswap/providers/profile_photo_provider.dart';
 import 'package:skillswap/providers/request_provider.dart';
+import 'package:skillswap/services/local_storage_service.dart';
+import 'package:skillswap/services/profile_photo_service.dart';
 import 'package:skillswap/services/skill_swap_repository.dart';
 
 void main() {
   testWidgets('renders the SkillSwap home screen', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
     final repository = InMemorySkillSwapRepository();
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           Provider<SkillSwapRepository>.value(value: repository),
           ChangeNotifierProvider(create: (_) => DiscoverProvider()),
+          ChangeNotifierProvider(
+            create: (_) => ProfilePhotoProvider(
+              storage: LocalStorageService(preferences),
+              picker: CameraProfilePhotoPicker(),
+            ),
+          ),
           ChangeNotifierProvider(create: (_) => AuthProvider()),
           ChangeNotifierProvider(
             create: (_) => RequestProvider(repository: repository),

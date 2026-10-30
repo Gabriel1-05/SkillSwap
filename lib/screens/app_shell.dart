@@ -11,6 +11,7 @@ import 'sent_requests_screen.dart';
 import '../providers/discover_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/local_data_provider.dart';
+import '../providers/profile_photo_provider.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -369,6 +370,7 @@ class _ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.watch<DiscoverProvider>().currentUser;
     final auth = context.watch<AuthProvider>();
+    final profilePhoto = context.watch<ProfilePhotoProvider>();
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 30, 22, 32),
       children: [
@@ -381,11 +383,16 @@ class _ProfilePage extends StatelessWidget {
         CircleAvatar(
             radius: 38,
             backgroundColor: const Color(0xFFDCE9DE),
-            child: Text(user.name.substring(0, 1),
-                style: const TextStyle(
-                    fontSize: 28,
-                    color: Color(0xFF1F6B57),
-                    fontWeight: FontWeight.w800))),
+            foregroundImage: profilePhoto.photoBytes == null
+                ? null
+                : MemoryImage(profilePhoto.photoBytes!),
+            child: profilePhoto.photoBytes == null
+                ? Text(user.name.substring(0, 1),
+                    style: const TextStyle(
+                        fontSize: 28,
+                        color: Color(0xFF1F6B57),
+                        fontWeight: FontWeight.w800))
+                : null),
         const SizedBox(height: 14),
         Center(
             child: Text(user.name,
@@ -424,6 +431,38 @@ class _ProfilePage extends StatelessWidget {
             leading: Icon(Icons.laptop_mac_outlined),
             title: Text('Mode belajar'),
             subtitle: Text('Online')),
+        const SizedBox(height: 12),
+        const Text(
+          'Foto profil kamera hanya disimpan di perangkat/browser ini; foto tidak diunggah.',
+          style: TextStyle(fontSize: 12, color: Color(0xFF68736E)),
+        ),
+        if (profilePhoto.errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              profilePhoto.errorMessage!,
+              style: const TextStyle(color: Color(0xFFB3261E)),
+            ),
+          ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: profilePhoto.isLoading ? null : profilePhoto.capture,
+          icon: profilePhoto.isLoading
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.camera_alt_outlined),
+          label: Text(profilePhoto.isLoading
+              ? 'Menyiapkan foto...'
+              : 'Ambil foto profil'),
+        ),
+        if (profilePhoto.photoBytes != null)
+          TextButton.icon(
+            onPressed: profilePhoto.isLoading ? null : profilePhoto.removePhoto,
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Hapus foto lokal'),
+          ),
         const SizedBox(height: 18),
         if (auth.user == null)
           OutlinedButton.icon(
@@ -434,7 +473,8 @@ class _ProfilePage extends StatelessWidget {
             label: const Text('Masuk atau daftar dengan Firebase'),
           )
         else ...[
-          Center(child: Text('Firebase: ${auth.user!.email ?? auth.user!.uid}')),
+          Center(
+              child: Text('Firebase: ${auth.user!.email ?? auth.user!.uid}')),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: auth.state == ViewState.loading ? null : auth.logout,

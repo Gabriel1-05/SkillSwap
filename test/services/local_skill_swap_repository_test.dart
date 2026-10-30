@@ -43,6 +43,8 @@ void main() {
       endTime: DateTime(2026, 10, 20, 10),
       mode: 'online',
       meetingLink: 'https://meet.google.com/abc-defg-hij',
+      latitude: null,
+      longitude: null,
     );
     await repository.createBooking(booking);
 
@@ -91,5 +93,52 @@ void main() {
     await repository.initialize();
 
     expect(repository.deleteRequest(0), throwsA(isA<RangeError>()));
+  });
+
+  test('offline booking coordinates persist locally and cannot attach online',
+      () async {
+    final preferences = await SharedPreferences.getInstance();
+    final repository = LocalSkillSwapRepository(
+      LocalStorageService(preferences),
+    );
+    await repository.initialize();
+    final booking = SessionBookingDraft(
+      requestId: 'accepted_andi_python',
+      skillId: 'python',
+      teacherId: 'seed_andi',
+      learnerId: 'seed_gabriel',
+      date: DateTime(2026, 10, 20),
+      startTime: DateTime(2026, 10, 20, 9),
+      endTime: DateTime(2026, 10, 20, 10),
+      mode: 'offline',
+      meetingLink: '',
+      latitude: -6.2,
+      longitude: 106.8,
+      locationAccuracyMeters: 20,
+    );
+
+    await repository.createBooking(booking);
+    final stored = await repository.getCreatedBookings();
+    expect(stored.single.latitude, -6.2);
+    expect(stored.single.longitude, 106.8);
+    expect(stored.single.locationAccuracyMeters, 20);
+
+    final onlineWithLocation = SessionBookingDraft(
+      requestId: booking.requestId,
+      skillId: booking.skillId,
+      teacherId: booking.teacherId,
+      learnerId: booking.learnerId,
+      date: booking.date,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      mode: 'online',
+      meetingLink: 'https://meet.google.com/abc-defg-hij',
+      latitude: booking.latitude,
+      longitude: booking.longitude,
+    );
+    await expectLater(
+      repository.createBooking(onlineWithLocation),
+      throwsA(isA<FormatException>()),
+    );
   });
 }

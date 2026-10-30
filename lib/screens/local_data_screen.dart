@@ -636,6 +636,10 @@ class _BookingEditDialogState extends State<_BookingEditDialog> {
       endTime: end,
       mode: _mode,
       meetingLink: _mode == 'online' ? _meetingLinkController.text.trim() : '',
+      latitude: _mode == 'offline' ? widget.booking.latitude : null,
+      longitude: _mode == 'offline' ? widget.booking.longitude : null,
+      locationAccuracyMeters:
+          _mode == 'offline' ? widget.booking.locationAccuracyMeters : null,
     );
     Navigator.pop(context);
     widget.onSave(updatedBooking);
@@ -831,6 +835,12 @@ class _BookingCard extends StatelessWidget {
               value: booking.mode == 'online' ? 'Online' : 'Tatap muka'),
           if (booking.mode == 'online' && booking.meetingLink.isNotEmpty)
             _DataRow(label: 'Meeting Link', value: booking.meetingLink),
+          if (booking.mode == 'offline' && booking.latitude != null)
+            _DataRow(
+              label: 'Lokasi lokal',
+              value:
+                  '${booking.latitude!.toStringAsFixed(5)}, ${booking.longitude!.toStringAsFixed(5)}',
+            ),
           const SizedBox(height: 6),
           const _StorageBadge(),
         ],
