@@ -1562,6 +1562,8 @@ Panduan assignment state management sebelumnya ada di [`docs/state-management-as
 
 Alur demo MVP: **Beranda → Temukan → kirim request → lihat request Firestore → Sesi → jadwalkan sesi → Data Lokal untuk membaca/mengedit/menghapus booking → Profil**. Form memiliki validasi, feedback submit, retry saat pemuatan gagal, dan state kosong.
 
+Catatan reviewer berisi peta lokasi kode, langkah demo, privasi, dan perintah pengujian tersedia di [`REVIEWER_NOTES.md`](REVIEWER_NOTES.md).
+
 Tiga advanced feature dan manfaatnya:
 
 1. **Firebase Authentication** melindungi pengiriman serta pembacaan request berdasarkan akun pengguna.
