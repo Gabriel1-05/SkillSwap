@@ -24,6 +24,7 @@ class LocalDataProvider extends ChangeNotifier {
   List<SessionBookingDraft> bookings = [];
   bool isLoading = false;
   String? errorMessage;
+  String? successMessage;
 
   // ===== READ =====
   /// Memuat semua data request & booking dari local storage.
@@ -31,6 +32,7 @@ class LocalDataProvider extends ChangeNotifier {
     if (isLoading) return;
     isLoading = true;
     errorMessage = null;
+    successMessage = null;
     notifyListeners();
     try {
       requests = await _repository.getCreatedRequests();
@@ -49,6 +51,7 @@ class LocalDataProvider extends ChangeNotifier {
       _runMutation(
         () => _repository.updateRequest(index, request),
         'Permintaan gagal diperbarui',
+        'Permintaan berhasil diperbarui.',
       );
 
   /// Memperbarui booking pada index tertentu.
@@ -56,6 +59,7 @@ class LocalDataProvider extends ChangeNotifier {
       _runMutation(
         () => _repository.updateBooking(index, booking),
         'Booking gagal diperbarui',
+        'Booking berhasil diperbarui.',
       );
 
   // ===== DELETE =====
@@ -63,12 +67,14 @@ class LocalDataProvider extends ChangeNotifier {
   Future<void> deleteRequest(int index) => _runMutation(
         () => _repository.deleteRequest(index),
         'Permintaan gagal dihapus',
+        'Permintaan berhasil dihapus.',
       );
 
   /// Menghapus booking pada index tertentu.
   Future<void> deleteBooking(int index) => _runMutation(
         () => _repository.deleteBooking(index),
         'Booking gagal dihapus',
+        'Booking berhasil dihapus.',
       );
 
   // ===== CLEAR ALL =====
@@ -76,11 +82,13 @@ class LocalDataProvider extends ChangeNotifier {
   Future<void> clearAllData() => _runMutation(
         _repository.clearAllData,
         'Data lokal gagal dihapus',
+        'Semua data lokal berhasil dihapus.',
       );
 
   Future<void> _runMutation(
     Future<void> Function() mutation,
     String failureMessage,
+    String successMessage,
   ) async {
     errorMessage = null;
     String? mutationError;
@@ -92,6 +100,9 @@ class LocalDataProvider extends ChangeNotifier {
     await loadAll();
     if (mutationError != null) {
       errorMessage = mutationError;
+      notifyListeners();
+    } else if (errorMessage == null) {
+      this.successMessage = successMessage;
       notifyListeners();
     }
   }

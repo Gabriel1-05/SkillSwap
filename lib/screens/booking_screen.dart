@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/view_state.dart';
 import '../models/workflow_models.dart';
 import '../providers/booking_provider.dart';
+import '../widgets/loading_status.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -45,38 +46,41 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<BookingProvider>();
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(22, 26, 22, 34),
-      children: [
-        const Text(
-          'Jadwalkan sesi',
-          style: TextStyle(
-            color: Color(0xFF193A36),
-            fontSize: 27,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-            'Pilih permintaan yang sudah diterima dan atur waktu belajar.'),
-        const SizedBox(height: 22),
-        if (provider.state == ViewState.loading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(36),
-              child: CircularProgressIndicator(),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(22, 26, 22, 34),
+          children: [
+            const Text(
+              'Jadwalkan sesi',
+              style: TextStyle(
+                color: Color(0xFF193A36),
+                fontSize: 27,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          )
-        else if (provider.state == ViewState.error)
-          _BookingErrorState(
-            message: provider.errorMessage ?? 'Data gagal dimuat.',
-            onRetry: provider.loadAcceptedSkillSwaps,
-          )
-        else if (provider.state == ViewState.empty)
-          const _BookingEmptyState()
-        else
-          _buildForm(provider),
-      ],
+            const SizedBox(height: 8),
+            const Text(
+                'Pilih permintaan yang sudah diterima dan atur waktu belajar.'),
+            const SizedBox(height: 22),
+            if (provider.state == ViewState.loading)
+              const Padding(
+                padding: EdgeInsets.all(36),
+                child: LoadingStatus(message: 'Memuat permintaan diterima...'),
+              )
+            else if (provider.state == ViewState.error)
+              _BookingErrorState(
+                message: provider.errorMessage ?? 'Data gagal dimuat.',
+                onRetry: provider.loadAcceptedSkillSwaps,
+              )
+            else if (provider.state == ViewState.empty)
+              const _BookingEmptyState()
+            else
+              _buildForm(provider),
+          ],
+        ),
+      ),
     );
   }
 
@@ -147,7 +151,13 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
           if (_timeError != null) ...[
             const SizedBox(height: 8),
-            Text(_timeError!, style: const TextStyle(color: Color(0xFFB3261E))),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                _timeError!,
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
+            ),
           ],
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
@@ -192,9 +202,12 @@ class _BookingScreenState extends State<BookingScreen> {
             if (provider.locationErrorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  provider.locationErrorMessage!,
-                  style: const TextStyle(color: Color(0xFFB3261E)),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    provider.locationErrorMessage!,
+                    style: const TextStyle(color: Color(0xFFB3261E)),
+                  ),
                 ),
               ),
             if (provider.capturedLocation case final location?) ...[
@@ -208,7 +221,14 @@ class _BookingScreenState extends State<BookingScreen> {
               TextButton.icon(
                 onPressed: provider.isSubmitting
                     ? null
-                    : provider.clearCapturedLocation,
+                    : () {
+                        provider.clearCapturedLocation();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Lokasi dihapus dari formulir.'),
+                          ),
+                        );
+                      },
                 icon: const Icon(Icons.delete_outline),
                 label: const Text('Hapus lokasi'),
               ),
@@ -240,14 +260,26 @@ class _BookingScreenState extends State<BookingScreen> {
           ],
           if (provider.submitError != null) ...[
             const SizedBox(height: 10),
-            Text(provider.submitError!,
-                style: const TextStyle(color: Color(0xFFB3261E))),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                provider.submitError!,
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
+            ),
           ],
           if (provider.didSubmit) ...[
             const SizedBox(height: 10),
-            const Text('Sesi berhasil dijadwalkan.',
+            Semantics(
+              liveRegion: true,
+              child: const Text(
+                'Sesi berhasil dijadwalkan.',
                 style: TextStyle(
-                    color: Color(0xFF1F6B57), fontWeight: FontWeight.w700)),
+                  color: Color(0xFF1F6B57),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ],
           const SizedBox(height: 16),
           FilledButton.icon(
@@ -389,7 +421,10 @@ class _BookingErrorState extends StatelessWidget {
           const Icon(Icons.cloud_off_outlined,
               size: 38, color: Color(0xFF9B4B42)),
           const SizedBox(height: 10),
-          Text(message, textAlign: TextAlign.center),
+          Semantics(
+            liveRegion: true,
+            child: Text(message, textAlign: TextAlign.center),
+          ),
           TextButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),

@@ -47,35 +47,134 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 18, 24, 30),
-            children: [
-              const Icon(Icons.swap_horiz_rounded, color: Color(0xFF1F6B57), size: 48),
-              const SizedBox(height: 18),
-              Text(_isRegister ? 'Buat akun baru' : 'Selamat datang kembali', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 8),
-              Text(_isRegister ? 'Mulai temukan teman belajar yang cocok.' : 'Masuk untuk melanjutkan perjalanan belajar.'),
-              const SizedBox(height: 30),
-              if (_isRegister) ...[
-                TextFormField(controller: _nameController, textInputAction: TextInputAction.next, decoration: const InputDecoration(labelText: 'Nama lengkap', border: OutlineInputBorder()), validator: validateName),
-                const SizedBox(height: 14),
-              ],
-              TextFormField(controller: _emailController, keyboardType: TextInputType.emailAddress, textInputAction: TextInputAction.next, decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()), validator: validateEmail),
-              const SizedBox(height: 14),
-              TextFormField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Kata sandi', border: OutlineInputBorder()), validator: validatePassword),
-              if (auth.errorMessage != null) ...[
-                const SizedBox(height: 14),
-                Text(auth.errorMessage!, style: const TextStyle(color: Color(0xFFB3261E))),
-              ],
-              const SizedBox(height: 22),
-              FilledButton(onPressed: isLoading ? null : _submit, child: isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(_isRegister ? 'Daftar' : 'Masuk')),
-              const SizedBox(height: 8),
-              TextButton(onPressed: isLoading ? null : () => setState(() => _isRegister = !_isRegister), child: Text(_isRegister ? 'Sudah punya akun? Masuk' : 'Belum punya akun? Daftar')),
-              if (!_isRegister)
-                TextButton(onPressed: isLoading ? null : _resetPassword, child: const Text('Lupa kata sandi?')),
-            ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: SizedBox.expand(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 18, 24, 30),
+                  children: [
+                    const Icon(Icons.swap_horiz_rounded,
+                        color: Color(0xFF1F6B57), size: 48),
+                    const SizedBox(height: 18),
+                    Text(
+                      _isRegister ? 'Buat akun baru' : 'Selamat datang kembali',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _isRegister
+                          ? 'Mulai temukan teman belajar yang cocok.'
+                          : 'Masuk untuk melanjutkan perjalanan belajar.',
+                    ),
+                    const SizedBox(height: 30),
+                    if (_isRegister) ...[
+                      TextFormField(
+                        controller: _nameController,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.name],
+                        decoration: const InputDecoration(
+                          labelText: 'Nama lengkap',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: validateName,
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: validateEmail,
+                    ),
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: [
+                        _isRegister
+                            ? AutofillHints.newPassword
+                            : AutofillHints.password,
+                      ],
+                      onFieldSubmitted: isLoading ? null : (_) => _submit(),
+                      decoration: const InputDecoration(
+                        labelText: 'Kata sandi',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: validatePassword,
+                    ),
+                    if (auth.errorMessage != null) ...[
+                      const SizedBox(height: 14),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          auth.errorMessage!,
+                          style: const TextStyle(color: Color(0xFFB3261E)),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 22),
+                    FilledButton(
+                      onPressed: isLoading ? null : _submit,
+                      child: isLoading
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  _isRegister
+                                      ? 'Mendaftarkan akun...'
+                                      : 'Sedang masuk...',
+                                ),
+                              ],
+                            )
+                          : Text(_isRegister ? 'Daftar' : 'Masuk'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: isLoading
+                          ? null
+                          : () => setState(() => _isRegister = !_isRegister),
+                      child: Text(
+                        _isRegister
+                            ? 'Sudah punya akun? Masuk'
+                            : 'Belum punya akun? Daftar',
+                      ),
+                    ),
+                    if (!_isRegister)
+                      TextButton(
+                        onPressed: isLoading ? null : _resetPassword,
+                        child: const Text('Lupa kata sandi?'),
+                      ),
+                    if (isLoading)
+                      Semantics(
+                        liveRegion: true,
+                        child: const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Sedang memproses permintaan autentikasi.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -84,11 +183,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _resetPassword() async {
     if (validateEmail(_emailController.text) != null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Isi email yang valid terlebih dahulu.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Isi email yang valid terlebih dahulu.')));
       return;
     }
-    final success = await context.read<AuthProvider>().sendPasswordReset(_emailController.text);
+    final success = await context
+        .read<AuthProvider>()
+        .sendPasswordReset(_emailController.text);
     if (!mounted) return;
-    if (success) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email reset kata sandi sudah dikirim.')));
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Email reset kata sandi sudah dikirim.')));
+    }
   }
 }

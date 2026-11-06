@@ -10,7 +10,11 @@ import 'package:skillswap/services/skill_swap_repository.dart';
 
 import '../fakes/workflow_test_repository.dart';
 
-Widget _requestApp(WorkflowTestRepository repository) => MultiProvider(
+Widget _requestApp(
+  WorkflowTestRepository repository, {
+  EdgeInsets viewInsets = EdgeInsets.zero,
+}) =>
+    MultiProvider(
       providers: [
         Provider<SkillSwapRepository>.value(value: repository),
         ChangeNotifierProvider(create: (_) => DiscoverProvider()),
@@ -18,7 +22,13 @@ Widget _requestApp(WorkflowTestRepository repository) => MultiProvider(
           create: (_) => RequestProvider(repository: repository),
         ),
       ],
-      child: const MaterialApp(home: Scaffold(body: RequestScreen())),
+      child: MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(viewInsets: viewInsets),
+          child: child!,
+        ),
+        home: const RequestScreen(),
+      ),
     );
 
 void main() {
@@ -58,6 +68,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Andi Pratama'), findsOneWidget);
+  });
+
+  testWidgets('keeps the active text field visible above the keyboard',
+      (tester) async {
+    final repository = WorkflowTestRepository();
+    tester.view.physicalSize = const Size(390, 700);
+    tester.view.devicePixelRatio = 1;
+    await tester.pumpWidget(
+      _requestApp(
+        repository,
+        viewInsets: const EdgeInsets.only(bottom: 300),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final messageField = find.byType(TextFormField).last;
+    await tester.showKeyboard(messageField);
+    await tester.pumpAndSettle();
+
+    expect(tester.getRect(messageField).bottom, lessThanOrEqualTo(400));
+    expect(tester.takeException(), isNull);
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
   });
 
   testWidgets('validates the required request message', (tester) async {

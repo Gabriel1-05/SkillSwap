@@ -33,6 +33,12 @@ void main() {
     await tester.pumpWidget(_localDataApp(repository));
     await tester.pumpAndSettle();
 
+    expect(find.byTooltip('Edit permintaan'), findsOneWidget);
+    expect(find.byTooltip('Hapus permintaan'), findsOneWidget);
+    expect(
+      tester.getSize(find.byTooltip('Edit permintaan').first).width,
+      greaterThanOrEqualTo(48),
+    );
     await tester.tap(find.byIcon(Icons.edit_outlined).first);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), 'Jadwal diperbarui');
@@ -40,6 +46,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.requests.single.message, 'Jadwal diperbarui');
+    expect(find.text('Permintaan berhasil diperbarui.'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.delete_outline).first);
     await tester.pumpAndSettle();
@@ -66,7 +73,7 @@ void main() {
     await tester.pumpWidget(_localDataApp(repository));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Booking (1)'));
+    await tester.tap(find.textContaining('Booking').first);
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.edit_outlined));
     await tester.pumpAndSettle();

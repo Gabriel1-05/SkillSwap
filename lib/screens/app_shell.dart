@@ -24,6 +24,7 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
   void _goToDiscover() => setState(() => _selectedIndex = 1);
+  void _goToProfile() => setState(() => _selectedIndex = 4);
 
   static const _destinations = [
     NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Beranda'),
@@ -44,21 +45,59 @@ class _AppShellState extends State<AppShell> {
       const _ProfilePage(),
     ];
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: IndexedStack(index: _selectedIndex, children: pages),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        destinations: _destinations,
-        onDestinationSelected: (index) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useNavigationRail = constraints.maxWidth >= 840;
+        void selectDestination(int index) {
           setState(() => _selectedIndex = index);
           if (index == 2) context.read<LocalDataProvider>().loadAll();
-        },
-        backgroundColor: const Color(0xFFFCFCF8),
-        indicatorColor: const Color(0xFFDDEBE3),
-      ),
+        }
+
+        final pageContent = SafeArea(
+          bottom: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: useNavigationRail ? 1040 : double.infinity,
+              ),
+              child: IndexedStack(index: _selectedIndex, children: pages),
+            ),
+          ),
+        );
+
+        return Scaffold(
+          body: useNavigationRail
+              ? Row(
+                  children: [
+                    NavigationRail(
+                      selectedIndex: _selectedIndex,
+                      labelType: NavigationRailLabelType.all,
+                      destinations: _destinations
+                          .map(
+                            (destination) => NavigationRailDestination(
+                              icon: destination.icon,
+                              label: Text(destination.label),
+                            ),
+                          )
+                          .toList(),
+                      onDestinationSelected: selectDestination,
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: pageContent),
+                  ],
+                )
+              : pageContent,
+          bottomNavigationBar: useNavigationRail
+              ? null
+              : NavigationBar(
+                  selectedIndex: _selectedIndex,
+                  destinations: _destinations,
+                  onDestinationSelected: selectDestination,
+                  backgroundColor: const Color(0xFFFCFCF8),
+                  indicatorColor: const Color(0xFFDDEBE3),
+                ),
+        );
+      },
     );
   }
 }
@@ -132,7 +171,12 @@ class _HomePage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 28),
-        const _SectionHeading(title: 'Skill kamu', action: 'Ubah'),
+        _SectionHeading(
+          title: 'Skill kamu',
+          action: 'Lihat profil',
+          onTap: () =>
+              context.findAncestorStateOfType<_AppShellState>()?._goToProfile(),
+        ),
         const SizedBox(height: 12),
         const Wrap(
           spacing: 8,
@@ -380,7 +424,12 @@ class _ProfilePage extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF193A36))),
         const SizedBox(height: 26),
-        CircleAvatar(
+        Semantics(
+          label: profilePhoto.photoBytes == null
+              ? 'Foto profil belum dipilih'
+              : 'Foto profil tersimpan di perangkat',
+          image: profilePhoto.photoBytes != null,
+          child: CircleAvatar(
             radius: 38,
             backgroundColor: const Color(0xFFDCE9DE),
             foregroundImage: profilePhoto.photoBytes == null
@@ -392,7 +441,9 @@ class _ProfilePage extends StatelessWidget {
                         fontSize: 28,
                         color: Color(0xFF1F6B57),
                         fontWeight: FontWeight.w800))
-                : null),
+                : null,
+          ),
+        ),
         const SizedBox(height: 14),
         Center(
             child: Text(user.name,
@@ -432,16 +483,23 @@ class _ProfilePage extends StatelessWidget {
             title: Text('Mode belajar'),
             subtitle: Text('Online')),
         const SizedBox(height: 12),
-        const Text(
-          'Foto profil kamera hanya disimpan di perangkat/browser ini; foto tidak diunggah.',
-          style: TextStyle(fontSize: 12, color: Color(0xFF68736E)),
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            profilePhoto.statusMessage ??
+                'Foto profil kamera hanya disimpan di perangkat/browser ini; foto tidak diunggah.',
+            style: const TextStyle(fontSize: 12, color: Color(0xFF68736E)),
+          ),
         ),
         if (profilePhoto.errorMessage != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              profilePhoto.errorMessage!,
-              style: const TextStyle(color: Color(0xFFB3261E)),
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                profilePhoto.errorMessage!,
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
             ),
           ),
         const SizedBox(height: 8),
@@ -476,42 +534,25 @@ class _ProfilePage extends StatelessWidget {
           Center(
               child: Text('Firebase: ${auth.user!.email ?? auth.user!.uid}')),
           const SizedBox(height: 8),
+          if (auth.errorMessage != null)
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                auth.errorMessage!,
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
+            ),
           OutlinedButton.icon(
             onPressed: auth.state == ViewState.loading ? null : auth.logout,
             icon: const Icon(Icons.logout),
-            label: const Text('Keluar dari Firebase'),
+            label: auth.state == ViewState.loading
+                ? const Text('Sedang keluar...')
+                : const Text('Keluar dari Firebase'),
           ),
         ],
       ],
     );
   }
-}
-
-class _ComingSoonPage extends StatelessWidget {
-  const _ComingSoonPage(
-      {required this.icon, required this.title, required this.subtitle});
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(34),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(icon, size: 42, color: const Color(0xFF1F6B57)),
-            const SizedBox(height: 14),
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF193A36))),
-            const SizedBox(height: 8),
-            Text(subtitle, textAlign: TextAlign.center),
-          ]),
-        ),
-      );
 }
 
 class _EmptyRecommendations extends StatelessWidget {

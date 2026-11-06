@@ -22,6 +22,7 @@ import 'package:provider/provider.dart';
 
 import '../models/workflow_models.dart';
 import '../providers/local_data_provider.dart';
+import '../widgets/loading_status.dart';
 
 class LocalDataScreen extends StatefulWidget {
   const LocalDataScreen({super.key});
@@ -59,104 +60,142 @@ class _LocalDataScreenState extends State<LocalDataScreen>
         // ---- Header ----
         Padding(
           padding: const EdgeInsets.fromLTRB(22, 26, 22, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const title = Text(
+                'Data Lokal',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF193A36),
+                ),
+              );
+              final count = Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCE9DE),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${provider.requests.length + provider.bookings.length} tersimpan',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F6B57),
+                  ),
+                ),
+              );
+              final refresh = IconButton(
+                tooltip: 'Muat ulang data lokal',
+                onPressed: provider.isLoading ? null : provider.loadAll,
+                icon: const Icon(Icons.refresh),
+              );
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Data Lokal',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF193A36),
-                      ),
+                  if (constraints.maxWidth < 430) ...[
+                    Row(children: [const Expanded(child: title), refresh]),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: count,
                     ),
+                  ] else
+                    Row(
+                      children: [
+                        const Expanded(child: title),
+                        refresh,
+                        count,
+                      ],
+                    ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Data tersimpan secara lokal (shared_preferences) dan tetap ada setelah aplikasi di-restart.',
+                    style: TextStyle(fontSize: 13, color: Color(0xFF68736E)),
                   ),
-                  IconButton(
-                    tooltip: 'Muat ulang data lokal',
-                    onPressed: provider.isLoading ? null : provider.loadAll,
-                    icon: const Icon(Icons.refresh),
-                  ),
-                  // Badge jumlah data tersimpan
+                  const SizedBox(height: 4),
                   Container(
+                    margin: const EdgeInsets.only(top: 8),
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCE9DE),
-                      borderRadius: BorderRadius.circular(20),
+                      color: const Color(0xFFF0F7E8),
+                      border: Border.all(color: const Color(0xFFC8DDB8)),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Text(
-                      '${provider.requests.length + provider.bookings.length} tersimpan',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F6B57),
-                      ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_outline,
+                            size: 16, color: Color(0xFF3D7D2A)),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Persistence aktif — data bertahan setelah refresh/restart',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF3D7D2A),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Data tersimpan secara lokal (shared_preferences) dan tetap ada setelah aplikasi di-restart.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF68736E)),
-              ),
-              const SizedBox(height: 4),
-              // Persistence badge
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0F7E8),
-                  border: Border.all(color: const Color(0xFFC8DDB8)),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.check_circle_outline,
-                        size: 16, color: Color(0xFF3D7D2A)),
-                    SizedBox(width: 6),
-                    Text(
-                      'Persistence aktif — data bertahan setelah refresh/restart',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF3D7D2A),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
+        if (provider.successMessage != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
+            child: Semantics(
+              liveRegion: true,
+              child: Material(
+                color: const Color(0xFFE7F2E6),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Text(
+                    provider.successMessage!,
+                    style: const TextStyle(
+                      color: Color(0xFF285D2A),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         if (provider.errorMessage != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
-            child: Material(
-              color: const Color(0xFFFFE9E7),
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        provider.errorMessage!,
-                        style: const TextStyle(
-                            color: Color(0xFF8C2B24), fontSize: 12),
+            child: Semantics(
+              liveRegion: true,
+              child: Material(
+                color: const Color(0xFFFFE9E7),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          provider.errorMessage!,
+                          style: const TextStyle(
+                              color: Color(0xFF8C2B24), fontSize: 12),
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: provider.isLoading ? null : provider.loadAll,
-                      child: const Text('Coba lagi'),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: provider.isLoading ? null : provider.loadAll,
+                        child: const Text('Coba lagi'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -170,40 +209,69 @@ class _LocalDataScreenState extends State<LocalDataScreen>
             color: const Color(0xFFECEFE5),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: TabBar(
-            controller: _tabController,
-            indicator: BoxDecoration(
-              color: const Color(0xFF1F6B57),
-              borderRadius: BorderRadius.circular(7),
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            labelColor: Colors.white,
-            unselectedLabelColor: const Color(0xFF3D5147),
-            labelStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-            dividerColor: Colors.transparent,
-            tabs: [
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.send_outlined, size: 16),
-                    const SizedBox(width: 6),
-                    Text('Permintaan (${provider.requests.length})'),
-                  ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final stacked = constraints.maxWidth < 430;
+              Widget tabLabel({
+                required IconData icon,
+                required String label,
+                required int count,
+              }) {
+                final content = stacked
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(icon, size: 16),
+                          const SizedBox(height: 2),
+                          Text(label, maxLines: 1, overflow: TextOverflow.fade),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(icon, size: 16),
+                          const SizedBox(width: 6),
+                          Text('$label ($count)'),
+                        ],
+                      );
+                return Semantics(
+                  label: '$label, $count tersimpan',
+                  child: content,
+                );
+              }
+
+              return TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: const Color(0xFF1F6B57),
+                  borderRadius: BorderRadius.circular(7),
                 ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.event_outlined, size: 16),
-                    const SizedBox(width: 6),
-                    Text('Booking (${provider.bookings.length})'),
-                  ],
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: Colors.white,
+                unselectedLabelColor: const Color(0xFF3D5147),
+                labelStyle: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
-              ),
-            ],
+                dividerColor: Colors.transparent,
+                tabs: [
+                  Tab(
+                    child: tabLabel(
+                      icon: Icons.send_outlined,
+                      label: 'Permintaan',
+                      count: provider.requests.length,
+                    ),
+                  ),
+                  Tab(
+                    child: tabLabel(
+                      icon: Icons.event_outlined,
+                      label: 'Booking',
+                      count: provider.bookings.length,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
         const SizedBox(height: 8),
@@ -211,7 +279,7 @@ class _LocalDataScreenState extends State<LocalDataScreen>
         // ---- Content ----
         Expanded(
           child: provider.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const LoadingStatus(message: 'Memuat data lokal...')
               : TabBarView(
                   controller: _tabController,
                   children: [
@@ -341,6 +409,7 @@ class _RequestEditDialogState extends State<_RequestEditDialog> {
   @override
   Widget build(BuildContext context) => AlertDialog(
         title: const Text('Edit Permintaan'),
+        scrollable: true,
         content: Form(
           key: _formKey,
           child: Column(
@@ -723,11 +792,13 @@ class _RequestCard extends StatelessWidget {
               // Action buttons
               _ActionButton(
                   icon: Icons.edit_outlined,
+                  tooltip: 'Edit permintaan',
                   color: const Color(0xFF1F6B57),
                   onTap: onEdit),
               const SizedBox(width: 4),
               _ActionButton(
                   icon: Icons.delete_outline,
+                  tooltip: 'Hapus permintaan',
                   color: const Color(0xFFB3261E),
                   onTap: onDelete),
             ],
@@ -813,11 +884,13 @@ class _BookingCard extends StatelessWidget {
               ),
               _ActionButton(
                   icon: Icons.edit_outlined,
+                  tooltip: 'Edit booking',
                   color: const Color(0xFF1F6B57),
                   onTap: onEdit),
               const SizedBox(width: 4),
               _ActionButton(
                   icon: Icons.delete_outline,
+                  tooltip: 'Hapus booking',
                   color: const Color(0xFFB3261E),
                   onTap: onDelete),
             ],
@@ -894,29 +967,23 @@ class _DataRow extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
     required this.icon,
+    required this.tooltip,
     required this.color,
     required this.onTap,
   });
 
   final IconData icon;
+  final String tooltip;
   final Color color;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          border: Border.all(color: color.withAlpha(50)),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Icon(icon, size: 18, color: color),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => IconButton(
+        tooltip: tooltip,
+        onPressed: onTap,
+        icon: Icon(icon, size: 20, color: color),
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      );
 }
 
 class _StorageBadge extends StatelessWidget {
@@ -954,32 +1021,41 @@ class _EmptyDataView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: const Color(0xFF9CB9A8)),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF193A36),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  constraints.maxHeight > 40 ? constraints.maxHeight - 40 : 0,
             ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF68736E)),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 48, color: const Color(0xFF9CB9A8)),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF193A36),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style:
+                      const TextStyle(fontSize: 13, color: Color(0xFF68736E)),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

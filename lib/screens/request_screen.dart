@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +8,7 @@ import '../models/workflow_models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/discover_provider.dart';
 import '../providers/request_provider.dart';
+import '../widgets/loading_status.dart';
 
 class RequestScreen extends StatefulWidget {
   const RequestScreen({super.key});
@@ -14,9 +17,12 @@ class RequestScreen extends StatefulWidget {
   State<RequestScreen> createState() => _RequestScreenState();
 }
 
-class _RequestScreenState extends State<RequestScreen> {
+class _RequestScreenState extends State<RequestScreen>
+    with WidgetsBindingObserver {
   final _formKey = GlobalKey<FormState>();
   final _messageController = TextEditingController();
+  final _messageFocusNode = FocusNode();
+  final _messageFieldKey = GlobalKey();
   String? _candidateId;
   String? _learnSkill;
   String _teachSkill = 'ui-ux';
@@ -24,6 +30,8 @@ class _RequestScreenState extends State<RequestScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _messageFocusNode.addListener(_onMessageFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<RequestProvider>().loadCandidates();
     });
@@ -31,8 +39,38 @@ class _RequestScreenState extends State<RequestScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _messageFocusNode
+      ..removeListener(_onMessageFocusChanged)
+      ..dispose();
     _messageController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    _ensureMessageFieldVisible();
+  }
+
+  void _onMessageFocusChanged() {
+    if (mounted) setState(() {});
+    _ensureMessageFieldVisible();
+  }
+
+  void _ensureMessageFieldVisible() {
+    if (!_messageFocusNode.hasFocus) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final fieldContext = _messageFieldKey.currentContext;
+        if (!mounted || fieldContext == null) return;
+        Scrollable.ensureVisible(
+          fieldContext,
+          alignment: 0.15,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+        );
+      });
+    });
   }
 
   @override
@@ -41,37 +79,52 @@ class _RequestScreenState extends State<RequestScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(22, 26, 22, 34),
-          children: [
-            const Text(
-              'Kirim permintaan',
-              style: TextStyle(
-                color: Color(0xFF193A36),
-                fontSize: 27,
-                fontWeight: FontWeight.w800,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                22,
+                26,
+                22,
+                _messageFocusNode.hasFocus
+                    ? math.max(
+                        34.0,
+                        MediaQuery.sizeOf(context).height -
+                            MediaQuery.viewInsetsOf(context).bottom,
+                      )
+                    : 34,
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text('Mulai pertukaran skill dengan teman yang cocok.'),
-            const SizedBox(height: 22),
-            if (provider.state == ViewState.loading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(36),
-                  child: CircularProgressIndicator(),
+              children: [
+                const Text(
+                  'Kirim permintaan',
+                  style: TextStyle(
+                    color: Color(0xFF193A36),
+                    fontSize: 27,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              )
-            else if (provider.state == ViewState.error)
-              _RequestErrorState(
-                message: provider.errorMessage ?? 'Data gagal dimuat.',
-                onRetry: provider.loadCandidates,
-              )
-            else if (provider.state == ViewState.empty)
-              const _RequestEmptyState()
-            else
-              _buildForm(context, provider),
-          ],
+                const SizedBox(height: 8),
+                const Text('Mulai pertukaran skill dengan teman yang cocok.'),
+                const SizedBox(height: 22),
+                if (provider.state == ViewState.loading)
+                  const Padding(
+                    padding: EdgeInsets.all(36),
+                    child:
+                        LoadingStatus(message: 'Memuat rekomendasi teman...'),
+                  )
+                else if (provider.state == ViewState.error)
+                  _RequestErrorState(
+                    message: provider.errorMessage ?? 'Data gagal dimuat.',
+                    onRetry: provider.loadCandidates,
+                  )
+                else if (provider.state == ViewState.empty)
+                  const _RequestEmptyState()
+                else
+                  _buildForm(context, provider),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -162,11 +215,14 @@ class _RequestScreenState extends State<RequestScreen> {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            key: _messageFieldKey,
             controller: _messageController,
+            focusNode: _messageFocusNode,
             enabled: !provider.isSubmitting,
             minLines: 3,
             maxLines: 5,
             maxLength: 300,
+            scrollPadding: const EdgeInsets.only(bottom: 24),
             decoration: const InputDecoration(
               labelText: 'Pesan untuk temanmu',
               hintText: 'Ceritakan rencana pertukaran skill kalian.',
@@ -182,14 +238,26 @@ class _RequestScreenState extends State<RequestScreen> {
           ),
           if (provider.submitError != null) ...[
             const SizedBox(height: 8),
-            Text(provider.submitError!,
-                style: const TextStyle(color: Color(0xFFB3261E))),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                provider.submitError!,
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
+            ),
           ],
           if (provider.didSubmit) ...[
             const SizedBox(height: 8),
-            const Text('Permintaan terkirim.',
+            Semantics(
+              liveRegion: true,
+              child: const Text(
+                'Permintaan terkirim.',
                 style: TextStyle(
-                    color: Color(0xFF1F6B57), fontWeight: FontWeight.w700)),
+                  color: Color(0xFF1F6B57),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ],
           const SizedBox(height: 12),
           FilledButton.icon(
@@ -240,7 +308,10 @@ class _RequestErrorState extends StatelessWidget {
           const Icon(Icons.cloud_off_outlined,
               size: 38, color: Color(0xFF9B4B42)),
           const SizedBox(height: 10),
-          Text(message, textAlign: TextAlign.center),
+          Semantics(
+            liveRegion: true,
+            child: Text(message, textAlign: TextAlign.center),
+          ),
           TextButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),

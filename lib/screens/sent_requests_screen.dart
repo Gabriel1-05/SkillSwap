@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../models/view_state.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sent_request_provider.dart';
+import '../widgets/loading_status.dart';
 import 'auth_screen.dart';
 
 class SentRequestsScreen extends StatefulWidget {
@@ -19,13 +22,13 @@ class _SentRequestsScreenState extends State<SentRequestsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _load();
+      if (mounted) unawaited(_load());
     });
   }
 
-  void _load() {
+  Future<void> _load() async {
     final senderId = context.read<AuthProvider>().user?.uid;
-    context.read<SentRequestProvider>().load(senderId);
+    await context.read<SentRequestProvider>().load(senderId);
   }
 
   @override
@@ -34,7 +37,9 @@ class _SentRequestsScreenState extends State<SentRequestsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Request dari Backend')),
       body: switch (provider.state) {
-        ViewState.loading => const Center(child: CircularProgressIndicator()),
+        ViewState.loading => const LoadingStatus(
+            message: 'Memuat request dari Firestore...',
+          ),
         ViewState.empty => const Center(
             child: Padding(
               padding: EdgeInsets.all(28),
@@ -50,19 +55,21 @@ class _SentRequestsScreenState extends State<SentRequestsScreen> {
           ),
         ViewState.error => _ErrorView(
             message: provider.errorMessage ?? 'Request gagal dimuat.',
-            onRetry: _load,
+            onRetry: () => unawaited(_load()),
             onSignIn: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const AuthScreen()),
             ),
             showSignIn: context.watch<AuthProvider>().user == null,
           ),
         ViewState.idle || ViewState.loaded => RefreshIndicator(
-            onRefresh: () async => _load(),
+            onRefresh: _load,
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
                 if (provider.state == ViewState.idle)
-                  const Center(child: CircularProgressIndicator())
+                  const LoadingStatus(
+                    message: 'Memuat request dari Firestore...',
+                  )
                 else
                   ...provider.requests.map(
                     (request) => Card(
@@ -113,9 +120,8 @@ class _SentRequestsScreenState extends State<SentRequestsScreen> {
 
   String _pretty(String value) => value
       .split(RegExp(r'[-_]'))
-      .map((part) => part.isEmpty
-          ? part
-          : '${part[0].toUpperCase()}${part.substring(1)}')
+      .map((part) =>
+          part.isEmpty ? part : '${part[0].toUpperCase()}${part.substring(1)}')
       .join(' ');
 }
 

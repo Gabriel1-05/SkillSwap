@@ -50,9 +50,10 @@ class AuthProvider extends ChangeNotifier {
       });
 
   Future<void> logout() async {
-    await _authService.logout();
-    user = null;
-    notifyListeners();
+    await _run(() async {
+      await _authService.logout();
+      user = null;
+    });
   }
 
   @override
@@ -73,6 +74,11 @@ class AuthProvider extends ChangeNotifier {
     } on AppException catch (error) {
       state = ViewState.error;
       errorMessage = error.message;
+      notifyListeners();
+      return false;
+    } on Object {
+      state = ViewState.error;
+      errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
       notifyListeners();
       return false;
     }
