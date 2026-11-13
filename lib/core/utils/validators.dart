@@ -18,3 +18,30 @@ String? validateName(String? value) {
   }
   return null;
 }
+
+String? validateUniversity(String? value) => _validateRequiredText(
+      value,
+      label: 'Nama universitas',
+      minimumLength: 2,
+      maximumLength: 100,
+    );
+
+String? validateMajor(String? value) => _validateRequiredText(
+      value,
+      label: 'Program studi',
+      minimumLength: 2,
+      maximumLength: 80,
+    );
+
+String? _validateRequiredText(
+  String? value, {
+  required String label,
+  required int minimumLength,
+  required int maximumLength,
+}) {
+  final text = value?.trim() ?? '';
+  if (text.length < minimumLength || text.length > maximumLength) {
+    return '$label harus $minimumLength sampai $maximumLength karakter.';
+  }
+  return null;
+}

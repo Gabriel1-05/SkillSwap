@@ -13,13 +13,50 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
+    function validEditableProfile(data) {
+      return data.name is string
+        && data.name.size() >= 2
+        && data.name.size() <= 50
+        && data.university is string
+        && data.university.size() >= 2
+        && data.university.size() <= 100
+        && data.major is string
+        && data.major.size() >= 2
+        && data.major.size() <= 80;
+    }
+
     match /users/{userId} {
-      allow read: if signedIn();
+      allow read: if owner(userId);
       allow create: if owner(userId)
+        && request.resource.data.keys().hasAll([
+          'id', 'email', 'name', 'university', 'major',
+          'teachSkillIds', 'learnSkillIds', 'availability',
+          'learningMode', 'rating', 'ratingCount'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id', 'email', 'name', 'university', 'major',
+          'teachSkillIds', 'learnSkillIds', 'availability',
+          'learningMode', 'rating', 'ratingCount'
+        ])
         && request.resource.data.id == userId
-        && request.resource.data.email == request.auth.token.email;
+        && request.resource.data.email is string
+        && request.resource.data.email == request.auth.token.email
+        && validEditableProfile(request.resource.data)
+        && request.resource.data.teachSkillIds is list
+        && request.resource.data.teachSkillIds.size() == 0
+        && request.resource.data.learnSkillIds is list
+        && request.resource.data.learnSkillIds.size() == 0
+        && request.resource.data.availability is list
+        && request.resource.data.availability.size() == 0
+        && request.resource.data.learningMode is string
+        && request.resource.data.learningMode == 'online'
+        && request.resource.data.rating is number
+        && request.resource.data.rating == 0
+        && request.resource.data.ratingCount is int
+        && request.resource.data.ratingCount == 0;
       allow update: if owner(userId)
-        && !changedKeys().hasAny(['rating', 'rating_sum', 'rating_count', 'total_sessions']);
+        && changedKeys().hasOnly(['name', 'university', 'major'])
+        && validEditableProfile(request.resource.data);
       allow delete: if false;
     }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,11 +9,13 @@ import 'auth_screen.dart';
 import 'booking_screen.dart';
 import 'local_data_screen.dart';
 import 'request_screen.dart';
+import 'profile_edit_screen.dart';
 import 'sent_requests_screen.dart';
 import '../providers/discover_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/local_data_provider.dart';
 import '../providers/profile_photo_provider.dart';
+import '../providers/profile_provider.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -407,14 +411,50 @@ class _MatchCard extends StatelessWidget {
   }
 }
 
-class _ProfilePage extends StatelessWidget {
+class _ProfilePage extends StatefulWidget {
   const _ProfilePage();
+
+  @override
+  State<_ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<_ProfilePage> {
+  String? _observedUid;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final uid = context.read<AuthProvider>().user?.uid;
+    if (uid == _observedUid) return;
+    _observedUid = uid;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final provider = context.read<ProfileProvider?>();
+      if (uid == null) {
+        provider?.clear();
+      } else if (provider != null) {
+        unawaited(provider.loadCurrentProfile(uid));
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final user = context.watch<DiscoverProvider>().currentUser;
     final auth = context.watch<AuthProvider>();
+    final profileProvider = context.watch<ProfileProvider?>();
     final profilePhoto = context.watch<ProfilePhotoProvider>();
+    final profile = auth.user == null ? null : profileProvider?.profile;
+    final displayName = profile?.name ?? user.name;
+    final profileEducation = [profile?.major, profile?.university]
+        .whereType<String>()
+        .where((value) => value.trim().isNotEmpty)
+        .join(' · ');
+    final education = profile == null
+        ? '${user.major} · ${user.university}'
+        : profileEducation.isEmpty
+            ? 'Lengkapi kampus dan program studi'
+            : profileEducation;
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 30, 22, 32),
       children: [
@@ -436,7 +476,7 @@ class _ProfilePage extends StatelessWidget {
                 ? null
                 : MemoryImage(profilePhoto.photoBytes!),
             child: profilePhoto.photoBytes == null
-                ? Text(user.name.substring(0, 1),
+                ? Text(displayName.isEmpty ? '?' : displayName.substring(0, 1),
                     style: const TextStyle(
                         fontSize: 28,
                         color: Color(0xFF1F6B57),
@@ -446,15 +486,13 @@ class _ProfilePage extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Center(
-            child: Text(user.name,
+            child: Text(displayName,
                 style: const TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF193A36)))),
         const SizedBox(height: 5),
-        Center(
-            child: Text('${user.major} · ${user.university}',
-                textAlign: TextAlign.center)),
+        Center(child: Text(education, textAlign: TextAlign.center)),
         const SizedBox(height: 30),
         const _SectionHeading(title: 'Bisa mengajar'),
         const SizedBox(height: 10),
@@ -531,6 +569,25 @@ class _ProfilePage extends StatelessWidget {
             label: const Text('Masuk atau daftar dengan Firebase'),
           )
         else ...[
+          if (profileProvider?.errorMessage != null)
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                profileProvider!.errorMessage!,
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
+            ),
+          if (profileProvider != null)
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ProfileEditScreen(uid: auth.user!.uid),
+                ),
+              ),
+              icon: const Icon(Icons.edit_outlined),
+              label: const Text('Edit profil'),
+            ),
+          const SizedBox(height: 8),
           Center(
               child: Text('Firebase: ${auth.user!.email ?? auth.user!.uid}')),
           const SizedBox(height: 8),

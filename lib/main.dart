@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
@@ -24,12 +25,14 @@ import 'providers/auth_provider.dart';
 import 'providers/discover_provider.dart';
 import 'providers/local_data_provider.dart';
 import 'providers/profile_photo_provider.dart';
+import 'providers/profile_provider.dart';
 import 'providers/request_provider.dart';
 import 'providers/sent_request_provider.dart';
 import 'screens/app_shell.dart';
 import 'services/local_skill_swap_repository.dart';
 import 'services/local_storage_service.dart';
 import 'services/profile_photo_service.dart';
+import 'services/profile_repository.dart';
 import 'services/skill_swap_request_api.dart';
 
 /// Entry point: menunggu SharedPreferences siap, lalu baru runApp.
@@ -47,6 +50,10 @@ void main() async {
   await repository.initialize();
   final requestApi = SkillSwapRequestApi(
     FirestoreSkillSwapRequestDataSource(FirebaseFirestore.instance),
+  );
+  final profileRepository = FirestoreProfileRepository(
+    dataSource: FirestoreProfileDataSource(FirebaseFirestore.instance),
+    identity: FirebaseProfileIdentity(FirebaseAuth.instance),
   );
 
   runApp(
@@ -66,6 +73,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => AuthProvider()..initialize(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(repository: profileRepository),
         ),
         ChangeNotifierProvider(
           create: (context) => RequestProvider(
